@@ -2,7 +2,10 @@
   padding: 40px;
   max-width: 1100px;
   margin: auto;
+  overflow-x: hidden;
 }
+
+/* ================= HEADER ================= */
 
 .class-header-card {
   background: white;
@@ -60,12 +63,27 @@
   background: #dc2626;
 }
 
+/* ================= STUDENT SECTION ================= */
+
 .student-section-card {
   background: white;
   padding: 25px;
   border-radius: 16px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.06);
 }
+
+/* 🔥 SCROLL ONLY HERE */
+.student-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.student-table-wrapper table {
+  min-width: 500px;
+}
+
+/* ================= CONTROLS ================= */
 
 .student-controls {
   display: flex;
@@ -116,6 +134,8 @@
   cursor: pointer;
 }
 
+/* ================= TABLE ================= */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -165,4 +185,62 @@ tbody tr:hover {
   text-align: center;
   padding: 30px;
   color: #6b7280;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+  .class-detail-container {
+    padding: 20px;
+  }
+
+  .class-header-card h1 {
+    font-size: 22px;
+  }
+
+  .class-actions {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .student-controls {
+    flex-direction: column;
+  }
+
+  .student-add-section {
+    flex-direction: column;
+  }
+
+  .student-add-section input {
+    width: 100%;
+  }
+
+  .student-add-section button {
+    width: 100%;
+  }
+
+  .student-search {
+    width: 100%;
+  }
+
+  .student-search input {
+    width: 100%;
+  }
+
+}
+
+/* ================= SCROLL STYLE ================= */
+
+.student-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.student-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
 }

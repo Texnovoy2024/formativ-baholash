@@ -79,9 +79,10 @@
 
 .register-card {
   background: #f3f4f6;
-  width: 480px;                 /* 🔥 KATTAROQ */
+  width: 100%;
+  max-width: 480px; /* 🔥 fix */
   border-radius: 24px;
-  padding: 35px;                /* 🔥 HAVODOR */
+  padding: 35px;
 
   color: #111;
 
@@ -89,7 +90,6 @@
     0 25px 60px rgba(0,0,0,0.25),
     inset 0 1px 0 rgba(255,255,255,0.4);
 }
-
 /* FORM */
 
 .form-group {
@@ -203,4 +203,97 @@
   margin: 0 auto 20px;
   font-size: 36px;
   color: #1c3e85;
+}
+
+@media (max-width: 768px) {
+
+  .register-page {
+    padding: 20px 14px;
+  }
+
+  .register-header h1 {
+    font-size: 28px;
+  }
+
+  .register-header p {
+    font-size: 14px;
+  }
+
+  .register-logo {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+  }
+
+  .register-card {
+    padding: 22px;
+    border-radius: 18px;
+  }
+
+  .input-box {
+    padding: 12px;
+  }
+
+  .register-btn {
+    padding: 14px;
+  }
+}
+.input-box {
+  transition: 0.2s;
+  border: 2px solid transparent;
+}
+
+.input-box:focus-within {
+  border: 2px solid #1e8a8a;
+  background: #fff;
+}
+.register-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.12);
+  padding: 6px;
+  border-radius: 40px;
+  margin-bottom: 35px;
+  backdrop-filter: blur(10px);
+}
+
+.tab {
+  flex: 1; /* 🔥 teng bo‘linadi */
+  justify-content: center;
+}
+@media (max-width: 768px) {
+
+  .register-tabs {
+    width: 100%;
+  }
+
+  .tab {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+.register-btn {
+  transition: 0.3s;
+}
+
+.register-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(30,138,138,0.4);
+}
+.register-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.95);
+}
+.register-card {
+  animation: fadeUp 0.6s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

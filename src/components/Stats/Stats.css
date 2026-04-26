@@ -70,3 +70,42 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+@media (max-width: 768px) {
+
+  .home-stats {
+    padding: 50px 16px;
+  }
+
+  .home-stats-wrapper {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .home-stat-card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .home-stat-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
+  }
+
+  .home-stat-icon svg {
+    font-size: 22px;
+  }
+
+  .home-stat-card h2 {
+    font-size: 28px;
+    margin-top: 12px;
+  }
+
+  .home-stat-card p {
+    font-size: 13px;
+  }
+
+}

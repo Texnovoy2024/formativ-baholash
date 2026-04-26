@@ -571,3 +571,51 @@
     transform: translateY(0);
   }
 }
+
+/* =========================
+   ABOUT PAGE RESPONSIVE PRO
+   ========================= */
+
+@media (max-width: 992px) {
+
+  /* HERO */
+  .about-hero {
+    padding: 50px 20px;
+  }
+
+  .about-hero h1 {
+    font-size: 32px;
+  }
+
+  .about-hero p {
+    font-size: 15px;
+  }
+
+  /* GRID → STACK */
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  /* GOAL */
+  .about-goal {
+    flex-direction: column;
+    gap: 40px;
+    padding: 60px 20px;
+  }
+
+  /* STATS */
+  .goal-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* STEPS */
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* TEAM */
+  .team-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import './TeacherLayout.css'
 
 export default function TeacherLayout() {
+	const [open, setOpen] = useState(false)
 	const navigate = useNavigate()
 	const [currentUser, setCurrentUser] = useState(null)
 
@@ -16,47 +17,66 @@ export default function TeacherLayout() {
 		navigate('/')
 	}
 
+	const handleLinkClick = () => {
+		setOpen(false)
+	}
+
 	return (
 		<div className='teacher-layout'>
-			<aside className='teacher-sidebar'>
+
+			{open && <div className="overlay" onClick={() => setOpen(false)} />}
+
+			<header className='teacher-topbar'>
+				<button className='menu-btn' onClick={() => setOpen(!open)}>
+					☰
+				</button>
+
+				<h3>Mening panelim</h3>
+
+				<div className='user-mini'>{currentUser?.name}</div>
+			</header>
+
+			<aside className={`teacher-sidebar ${open ? 'open' : ''}`}>
 				<div>
 					<h2 className='sidebar-title'>O'qituvchi oynasi</h2>
 
 					<nav className='sidebar-nav'>
-						<NavLink to='/teacher' end>
+						<NavLink to='/teacher' end onClick={handleLinkClick}>
 							Boshqaruv paneli
 						</NavLink>
 
-						<NavLink to='/teacher/classes'>
+						<NavLink to='/teacher/classes' onClick={handleLinkClick}>
 							Sinflar
 						</NavLink>
 
-						<NavLink to='/teacher/tasks'>
+						<NavLink to='/teacher/tasks' onClick={handleLinkClick}>
 							Topshiriqlar
 						</NavLink>
 
-						<NavLink to='/teacher/results'>
+						<NavLink to='/teacher/results' onClick={handleLinkClick}>
 							Natijalar
 						</NavLink>
 
 						{currentUser?.role === 'admin' && (
-							<NavLink to='/teacher/add-teacher'>
+							<NavLink to='/teacher/add-teacher' onClick={handleLinkClick}>
 								O'qituvchi qo'shish
 							</NavLink>
 						)}
 					</nav>
 				</div>
 
-				{currentUser && (
-					<div style={{ marginTop: '20px', fontSize: '13px', opacity: 0.7 }}>
-						<p>{currentUser.name}</p>
-						<p style={{ fontSize: '12px' }}>{currentUser.role}</p>
-					</div>
-				)}
+				<div>
+					{currentUser && (
+						<div className='user-box'>
+							<p>{currentUser.name}</p>
+							<span>{currentUser.role}</span>
+						</div>
+					)}
 
-				<button className='logout-btn' onClick={handleLogout}>
-					Asosiy sahifaga qaytish
-				</button>
+					<button className='logout-btn' onClick={handleLogout}>
+						Chiqish
+					</button>
+				</div>
 			</aside>
 
 			<main className='teacher-content'>

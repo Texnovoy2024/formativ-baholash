@@ -1,6 +1,43 @@
+/* LAYOUT */
 .teacher-layout {
   display: flex;
-  min-height: 100vh;
+}
+
+/* ================= TOPBAR ================= */
+
+.teacher-topbar {
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  height: 60px;
+
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 20px;
+  z-index: 100;
+}
+
+/* MENU BUTTON */
+
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* USER */
+
+.user-mini {
+  font-size: 14px;
+  color: #64748b;
 }
 
 /* ================= SIDEBAR ================= */
@@ -19,51 +56,170 @@
   top: 0;
   left: 0;
   height: 100vh;
+
+  transition: 0.3s;
 }
 
+/* TITLE */
 .sidebar-title {
   margin-bottom: 30px;
 }
+
+/* NAV */
 
 .sidebar-nav a {
   display: block;
   text-decoration: none;
   color: #cbd5e1;
-  padding: 10px 0;
-  border-radius: 6px;
+  padding: 10px;
+  border-radius: 8px;
   transition: 0.2s;
 }
 
 .sidebar-nav a.active {
   background: #1e293b;
   color: white;
-  padding-left: 10px;
 }
 
 .sidebar-nav a:hover {
+  background: #1e293b;
   color: white;
 }
 
-/* ================= LOGOUT ================= */
+/* USER BOX */
+
+.user-box {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 15px;
+}
+
+/* LOGOUT */
 
 .logout-btn {
+  width: 100%;
   background: #ef4444;
   color: white;
   border: none;
   padding: 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .logout-btn:hover {
   background: #dc2626;
 }
 
-/* ================= MAIN ================= */
+/* ================= CONTENT ================= */
 
 .teacher-content {
   margin-left: 250px;
-  padding: 30px;
-  flex: 1;
+  padding: 80px 30px 30px;
+  width: 100%;
+  background: #f3f5f8;
+  min-height: 100vh;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+  .menu-btn {
+    display: block;
+  }
+
+  .teacher-topbar {
+    left: 0;
+  }
+
+  .teacher-sidebar {
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+
+  .teacher-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .teacher-content {
+    margin-left: 0;
+    padding: 80px 16px 20px;
+  }
+}
+
+/* TOPBAR (mobile) */
+.teacher-topbar {
+  display: none;
+  background: white;
+  padding: 12px 16px;
+  font-weight: 600;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  .teacher-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .teacher-sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    transition: 0.3s;
+    z-index: 1000;
+  }
+
+  .teacher-sidebar.open {
+    left: 0;
+  }
+
+  .teacher-content {
+    margin-left: 0;
+  }
+}
+/* OVERLAY */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 900;
+}
+
+/* TOPBAR BUTTON */
+.menu-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* MOBILE FIX */
+@media (max-width: 768px) {
+
+  .teacher-sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    transition: 0.3s;
+    z-index: 1000;
+  }
+
+  .teacher-sidebar.open {
+    left: 0;
+  }
+
+  .teacher-content {
+    margin-left: 0;
+  }
+
+  .teacher-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 12px 16px;
+  }
 }

@@ -10,16 +10,19 @@
   z-index: 1000;
 }
 
-/* Container */
+/* 🔥 FIXED */
 .container {
-  width: 1200px;
+  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
 
+/* Wrapper */
 .navbar-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 16px;
 }
 
 /* ================= LEFT ================= */
@@ -68,7 +71,6 @@
   font-size: 14px;
   padding: 8px 14px;
   border-radius: 20px;
-  cursor: pointer;
   transition: all 0.25s ease;
 }
 
@@ -89,7 +91,6 @@
   gap: 18px;
 }
 
-/* Umumiy button o'lcham */
 .login-btn,
 .register-btn {
   height: 36px;
@@ -99,19 +100,17 @@
   justify-content: center;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 8px;   /* pill emas */
+  border-radius: 8px;
   white-space: nowrap;
   border: none;
   cursor: pointer;
   transition: 0.2s ease;
 }
 
-
-.login-btn:hover {
-  color: #ffffff;
+.login-btn {
+  color: #fff;
 }
 
-/* Ro'yxatdan o'tish */
 .register-btn {
   background: #f5b400;
   color: #0f172a;
@@ -119,4 +118,60 @@
 
 .navbar-right a {
   text-decoration: none;
+}
+
+/* ================= MOBILE ================= */
+.menu-icon {
+  display: none;
+  font-size: 26px;
+  color: white;
+  cursor: pointer;
+}
+
+/* MOBILE MENU */
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: #162d5f;
+  padding: 16px;
+  gap: 14px;
+}
+
+.mobile-menu a,
+.mobile-menu button {
+  color: white;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+
+  .navbar-center {
+    display: none;
+  }
+
+  .navbar-right {
+    display: none;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+
+  .mobile-menu {
+    display: flex;
+  }
+
+  .logo-text h3 {
+    font-size: 14px;
+  }
+
+  .logo-text span {
+    display: none;
+  }
 }

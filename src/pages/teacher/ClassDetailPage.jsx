@@ -218,6 +218,7 @@ export default function ClassDetailPage() {
             Hozircha o‘quvchilar yo‘q
           </div>
         ) : (
+          <div className="student-table-wrapper">
           <table>
             <thead>
               <tr>
@@ -266,6 +267,7 @@ export default function ClassDetailPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

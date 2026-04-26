@@ -163,3 +163,82 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* =========================
+   RESPONSIVE FIX
+   ========================= */
+
+@media (max-width: 992px) {
+
+  .methodology-wrapper {
+    grid-template-columns: 1fr;
+    gap: 50px;
+  }
+
+  .methodology-left {
+    text-align: center;
+  }
+
+  .method-desc {
+    margin-inline: auto;
+    max-width: 600px;
+  }
+
+  .method-list {
+    align-items: center;
+  }
+
+  .method-item {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .method-btn {
+    margin-top: 10px;
+  }
+
+  .methodology-right {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .method-card {
+    width: 100%;
+    max-width: 500px;
+  }
+}
+@media (max-width: 576px) {
+
+  .methodology {
+    padding: 60px 16px;
+  }
+
+  .methodology-left h2 {
+    font-size: 26px;
+  }
+
+  .method-desc {
+    font-size: 15px;
+  }
+
+  .method-item {
+    padding: 10px 14px;
+  }
+
+  .method-item h4 {
+    font-size: 14px;
+  }
+
+  .method-item span {
+    font-size: 12px;
+  }
+
+  .method-card {
+    padding: 22px;
+    border-radius: 16px;
+  }
+
+  .method-card li {
+    font-size: 14px;
+  }
+}

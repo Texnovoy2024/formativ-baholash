@@ -1,68 +1,86 @@
-.student-layout {
+/* TOPBAR */
+.student-topbar {
 	display: flex;
-	min-height: 100vh;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 16px;
+	background: white;
+	border-bottom: 1px solid #e5e7eb;
+	position: sticky;
+	top: 0;
+	z-index: 100;
 }
 
-/* ================= SIDEBAR ================= */
+.student-topbar button {
+	font-size: 20px;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
 
+/* SIDEBAR BASE */
 .student-sidebar {
-	width: 240px;
+	width: 250px;
 	background: #0f172a;
 	color: white;
 	padding: 20px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-
-	position: fixed;     /* 🔥 FIXED */
+	position: fixed;
 	top: 0;
 	left: 0;
-	height: 100vh;
+	height: 100%;
+	transform: translateX(-100%);
+	transition: 0.3s;
+	z-index: 200;
 }
 
-.student-sidebar h2 {
-	margin-bottom: 30px;
+/* OPEN */
+.student-sidebar.open {
+	transform: translateX(0);
 }
 
-.student-sidebar a {
+/* NAV */
+.sidebar-nav a {
 	display: block;
-	color: #cbd5e1;
+	padding: 10px;
+	border-radius: 8px;
+	color: #cbd5f5;
 	text-decoration: none;
-	padding: 10px 0;
-	border-radius: 6px;
-	transition: 0.2s;
+	margin-bottom: 6px;
 }
 
-.student-sidebar a.active {
+.sidebar-nav a.active {
 	background: #1e293b;
 	color: white;
-	padding-left: 10px;
 }
 
-.student-sidebar a:hover {
-	color: white;
-}
-
-/* ================= LOGOUT ================= */
-
-.logout-btn {
-	background: #ef4444;
-	color: white;
-	border: none;
-	padding: 10px;
-	border-radius: 6px;
-	cursor: pointer;
-	transition: 0.2s;
-}
-
-.logout-btn:hover {
-	background: #dc2626;
-}
-
-/* ================= MAIN ================= */
-
+/* CONTENT */
 .student-main {
-	margin-left: 240px;   /* 🔥 Sidebar width ga teng */
-	padding: 30px;
-	flex: 1;
+	padding: 20px;
+	margin-left: 0;
+}
+
+/* OVERLAY */
+.overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.4);
+	z-index: 100;
+}
+
+/* DESKTOP */
+@media (min-width: 768px) {
+	.student-sidebar {
+		transform: translateX(0);
+	}
+
+	.overlay {
+		display: none;
+	}
+
+	.student-main {
+		margin-left: 250px;
+	}
 }

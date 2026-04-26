@@ -1,0 +1,122 @@
+/* ================= NAVBAR ================= */
+.navbar {
+  width: 100%;
+  background: #162d5f;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Container */
+.container {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.navbar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ================= LEFT ================= */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-box {
+  width: 40px;
+  height: 40px;
+  background: #f5b400;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon {
+  font-size: 20px;
+  color: #162d5f;
+}
+
+.logo-text h3 {
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.logo-text span {
+  color: #a8b2c1;
+  font-size: 12px;
+}
+
+/* ================= CENTER ================= */
+.navbar-center {
+  display: flex;
+  gap: 24px;
+}
+
+.navbar-center a {
+  color: #c7d2e0;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.navbar-center a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.navbar-center .active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ================= RIGHT ================= */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Umumiy button o'lcham */
+.login-btn,
+.register-btn {
+  height: 36px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;   /* pill emas */
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+
+.login-btn:hover {
+  color: #ffffff;
+}
+
+/* Ro'yxatdan o'tish */
+.register-btn {
+  background: #f5b400;
+  color: #0f172a;
+}
+
+.navbar-right a {
+  text-decoration: none;
+}

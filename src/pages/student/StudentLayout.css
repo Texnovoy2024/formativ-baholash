@@ -1,0 +1,68 @@
+.student-layout {
+	display: flex;
+	min-height: 100vh;
+}
+
+/* ================= SIDEBAR ================= */
+
+.student-sidebar {
+	width: 240px;
+	background: #0f172a;
+	color: white;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	position: fixed;     /* 🔥 FIXED */
+	top: 0;
+	left: 0;
+	height: 100vh;
+}
+
+.student-sidebar h2 {
+	margin-bottom: 30px;
+}
+
+.student-sidebar a {
+	display: block;
+	color: #cbd5e1;
+	text-decoration: none;
+	padding: 10px 0;
+	border-radius: 6px;
+	transition: 0.2s;
+}
+
+.student-sidebar a.active {
+	background: #1e293b;
+	color: white;
+	padding-left: 10px;
+}
+
+.student-sidebar a:hover {
+	color: white;
+}
+
+/* ================= LOGOUT ================= */
+
+.logout-btn {
+	background: #ef4444;
+	color: white;
+	border: none;
+	padding: 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: 0.2s;
+}
+
+.logout-btn:hover {
+	background: #dc2626;
+}
+
+/* ================= MAIN ================= */
+
+.student-main {
+	margin-left: 240px;   /* 🔥 Sidebar width ga teng */
+	padding: 30px;
+	flex: 1;
+}

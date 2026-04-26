@@ -1,0 +1,72 @@
+/* ===============================
+   HOME PAGE – STATS SECTION
+   (About bilan clash bo‘lmaydi)
+   =============================== */
+
+.home-stats {
+  background: #2f4376; /* rasmdagidek dark blue */
+  padding: 90px 0;
+}
+
+/* GRID */
+
+.home-stats-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+  text-align: center;
+}
+
+/* CARD */
+
+.home-stat-card h2 {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: 800;
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+
+.home-stat-card p {
+  color: #cbd5e1;
+  font-size: 15px;
+}
+
+/* ICON BOX */
+
+.home-stat-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto;
+
+  background: #f4b400; /* yellow */
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ICON */
+
+.home-stat-icon svg {
+  font-size: 30px;
+  color: #1e3a8a;
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+
+@media (max-width: 992px) {
+  .home-stats-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .home-stats-wrapper {
+    grid-template-columns: 1fr;
+  }
+}

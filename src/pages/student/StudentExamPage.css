@@ -1,0 +1,154 @@
+.se-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 40px;
+}
+
+/* STICKY WRAPPER */
+.se-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #f8fafc;
+  padding-bottom: 15px;
+}
+
+/* HEADER */
+.se-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+}
+
+.se-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0f172a;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* PROGRESS */
+.se-progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.se-progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.se-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#2563eb,#22c55e);
+  transition: 0.3s;
+}
+
+/* QUESTIONS */
+.se-question-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.se-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+/* FINISH */
+.se-finish-btn {
+  margin-top: 30px;
+  padding: 12px 22px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* ===== MODAL FIXED ===== */
+
+.se-modal-overlay {
+  position: fixed;     /* 🔥 MUHIM */
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;       /* 🔥 Eng ustida turadi */
+}
+
+.se-modal {
+  background: white;
+  width: 400px;
+  max-width: 90%;
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+  animation: seModalPop 0.25s ease;
+}
+
+@keyframes seModalPop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.se-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.se-modal-buttons button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.se-modal-buttons button:first-child {
+  background: #f3f4f6;
+}
+
+.se-modal-buttons .confirm-btn {
+  background: #16a34a;
+  color: white;
+}
+.se-sticky {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  padding: 20px 0;
+  z-index: 100;
+}
+
+.se-timer.danger {
+  background: #dc2626;
+}

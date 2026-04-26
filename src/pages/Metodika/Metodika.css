@@ -1,0 +1,211 @@
+/* ================= PAGE ================= */
+.metodika-page {
+  background: #f3f5f8;
+  min-height: 100vh;
+}
+
+/* ================= HERO ================= */
+.metodika-hero {
+  padding: 70px;
+  text-align: center;
+  color: white;
+
+  background: linear-gradient(
+    90deg,
+    #1c3f77,
+    #245f86
+  );
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 18px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
+
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.metodika-hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.metodika-hero p {
+  max-width: 720px;
+  margin: auto;
+  opacity: 0.9;
+}
+
+/* ================= CONTENT ================= */
+.metodika-content {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  margin: 70px auto;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 300px;
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+/* SEARCH */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  background: #f1f5f9;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+/* CATEGORY TITLE */
+.sidebar h4 {
+  margin: 18px 0 8px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #64748b;
+}
+
+/* ITEM */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.item:hover {
+  background: #f1f5f9;
+}
+
+.item.active {
+  background: #1e3a8a;
+  color: white;
+}
+
+.item svg {
+  font-size: 18px;
+}
+
+
+/* ================= ARTICLE ================= */
+.article {
+  flex: 1;
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 14px;
+}
+
+.article h2 {
+  font-size: 30px;
+  margin-bottom: 16px;
+}
+
+.article p {
+  line-height: 1.7;
+  color: #374151;
+}
+
+/* ================= NAVIGATION ================= */
+.topic-nav {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.topic-nav button {
+  background: none;
+  border: none;
+  color: #1e3a8a;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.topic-nav button:hover {
+  opacity: 0.7;
+}
+.metodika-page {
+  background: #f3f5f8;
+  padding-bottom: 1px; /* footer gap */
+}
+
+/* =====================================
+   SOFT REVEAL (HOME PAGE STYLE)
+===================================== */
+
+/* Hero ichidagi elementlar */
+.metodika-hero .badge,
+.metodika-hero h1,
+.metodika-hero p {
+  opacity: 0;
+  transform: translateY(-30px);
+  animation: softReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stagger delay */
+.metodika-hero h1 {
+  animation-delay: 0.15s;
+}
+
+.metodika-hero p {
+  animation-delay: 0.3s;
+}
+
+/* Sidebar */
+.sidebar {
+  opacity: 0;
+  transform: translateY(-25px);
+  animation: softReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.4s;
+}
+
+/* Article */
+.article {
+  opacity: 0;
+  transform: translateY(-25px);
+  animation: softReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.55s;
+}
+
+/* Keyframe */
+@keyframes softReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

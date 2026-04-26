@@ -1,0 +1,232 @@
+/* ===============================
+   TEACHER TASKS WRAPPER
+================================ */
+.teacher-tasks {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.teacher-tasks__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* ===============================
+   FORM CARD
+================================ */
+.teacher-tasks__form {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: grid;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.teacher-input,
+.teacher-textarea,
+.teacher-select {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.teacher-textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.teacher-input:focus,
+.teacher-textarea:focus,
+.teacher-select:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ===============================
+   BUTTON SYSTEM
+================================ */
+.teacher-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.teacher-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.teacher-btn-secondary {
+  background: #f3f4f6;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: 0.2s ease;
+}
+
+.teacher-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.teacher-btn-outline {
+  border: 1px solid #d1d5db;
+  background: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.teacher-btn-outline:hover {
+  background: #f3f4f6;
+}
+
+/* ===============================
+   SEARCH + CONTROLS
+================================ */
+.teacher-tasks__controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.teacher-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.teacher-search input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+/* ===============================
+   TASK GRID
+================================ */
+.teacher-tasks__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ===============================
+   TASK CARD
+================================ */
+.teacher-task-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: 0.25s ease;
+}
+
+.teacher-task-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.teacher-task-card h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.teacher-task-desc {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.teacher-task-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 14px;
+}
+
+/* ===============================
+   BADGES
+================================ */
+.teacher-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.teacher-badge--homework {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.teacher-badge--quiz {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.teacher-badge--test {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.teacher-badge--project {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* ===============================
+   ACTION BUTTONS
+================================ */
+.teacher-task-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.teacher-task-actions button {
+  background: #f3f4f6;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.teacher-task-actions button:hover {
+  background: #e5e7eb;
+}
+
+.teacher-delete-btn {
+  background: #fee2e2 !important;
+  color: #b91c1c;
+}
+
+.teacher-delete-btn:hover {
+  background: #fecaca !important;
+}

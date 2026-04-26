@@ -1,0 +1,140 @@
+/* =========================
+   WRAPPER
+========================= */
+.tpb-container {
+  padding: 40px;
+}
+
+.tpb-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* =========================
+   CARD
+========================= */
+.tpb-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  max-width: 700px;
+}
+
+/* =========================
+   INPUT GROUP
+========================= */
+.tpb-input-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.tpb-input-group textarea,
+.tpb-input-group input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.tpb-input-group textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.tpb-input-group input:focus,
+.tpb-input-group textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* =========================
+   STATUS
+========================= */
+.tpb-status {
+  margin: 15px 0;
+}
+
+.tpb-published {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.tpb-draft {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+.tpb-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.tpb-save {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+}
+
+.tpb-save:hover {
+  background: #1f2937;
+}
+
+.tpb-publish {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s;
+}
+
+.tpb-publish:hover {
+  background: #1d4ed8;
+}
+
+.tpb-publish:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* =========================
+   SAVED INDICATOR
+========================= */
+.tpb-saved {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #15803d;
+  font-weight: 600;
+}

@@ -1,0 +1,137 @@
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Clock, FileText, CheckCircle, FolderKanban } from "lucide-react"
+import "./StudentTasksPage.css"
+
+export default function StudentTasksPage() {
+  const [exams, setExams] = useState([])
+  const [projects, setProjects] = useState([])
+  const navigate = useNavigate()
+
+  const currentUser =
+    JSON.parse(localStorage.getItem("currentUser")) || {}
+
+  useEffect(() => {
+    const allExams =
+      JSON.parse(localStorage.getItem("allExams")) || []
+    const allProjects =
+      JSON.parse(localStorage.getItem("allProjects")) || []
+
+    setExams(allExams.filter(e => e.isPublished))
+    setProjects(allProjects.filter(p => p.isPublished))
+  }, [])
+
+  const results =
+    JSON.parse(localStorage.getItem("examResults")) || []
+
+  const projectSubmissions =
+    JSON.parse(localStorage.getItem("projectSubmissions")) || []
+
+  if (exams.length === 0 && projects.length === 0) {
+    return (
+      <div className="st-page st-empty">
+        <h2>Hozircha topshiriqlar mavjud emas</h2>
+      </div>
+    )
+  }
+
+  return (
+    <div className="st-page">
+      <h1 className="st-title">Topshiriqlar</h1>
+
+      <div className="st-grid">
+
+        {/* ================= EXAMS ================= */}
+        {exams.map(exam => {
+          const isDone = results.some(
+            r =>
+              r.examId === exam.id &&
+              r.studentId === currentUser.id
+          )
+
+          return (
+            <div key={exam.id} className="st-card">
+              <div className="st-card-header">
+                <h3>{exam.examTitle}</h3>
+
+                {isDone && (
+                  <span className="st-badge">
+                    <CheckCircle size={14} /> Topshirilgan
+                  </span>
+                )}
+              </div>
+
+              <div className="st-info">
+                <p>
+                  <Clock size={16} />
+                  {exam.timeLimit} daqiqa
+                </p>
+
+                <p>
+                  <FileText size={16} />
+                  {exam.questions?.length || 0} savol
+                </p>
+              </div>
+
+              <button
+                className={`st-btn ${isDone ? "st-done" : "st-start"}`}
+                disabled={isDone}
+                onClick={() =>
+                  navigate(`/student/exam/${exam.id}`)
+                }
+              >
+                {isDone ? "Yakunlangan" : "Boshlash"}
+              </button>
+            </div>
+          )
+        })}
+
+        {/* ================= PROJECTS ================= */}
+        {projects.map(project => {
+          const isSubmitted = projectSubmissions.some(
+            s =>
+              s.projectId === project.id &&
+              s.studentId === currentUser.id
+          )
+
+          return (
+            <div key={project.id} className="st-card">
+              <div className="st-card-header">
+                <h3>{project.title}</h3>
+
+                {isSubmitted && (
+                  <span className="st-badge">
+                    <CheckCircle size={14} /> Topshirilgan
+                  </span>
+                )}
+              </div>
+
+              <div className="st-info">
+                <p>
+                  <Clock size={16} />
+                  Muddati: {project.deadline}
+                </p>
+
+                <p>
+                  <FileText size={16} />
+                  Ball: {project.maxScore}
+                </p>
+              </div>
+
+              <button
+                className={`st-btn ${
+                  isSubmitted ? "st-done" : "st-start"
+                }`}
+                onClick={() =>
+                  navigate(`/student/projects/${project.id}`)
+                }
+              >
+                {isSubmitted ? "Ko'rish" : "Boshlash"}
+              </button>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

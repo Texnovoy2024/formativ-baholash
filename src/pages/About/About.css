@@ -1,0 +1,573 @@
+.about-page {
+  background: #f3f5f8;
+}
+
+/* HERO */
+.about-hero {
+  padding: 70px;
+  text-align: center;
+  color: white;
+  background: linear-gradient(
+    90deg,
+    #1c3f77,
+    #245f86
+  );
+}
+
+.about-badge {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.15);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.about-hero h1 {
+  font-size: 48px;
+  margin-bottom: 18px;
+}
+
+.about-hero p {
+  max-width: 750px;
+  margin: auto;
+  opacity: 0.9;
+}
+
+/* SECTIONS */
+.about-section {
+  padding: 80px 0;
+}
+
+.gray {
+  background: #eef2f6;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.task {
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.stage-card {
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.center-title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.team-card {
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  margin: auto;
+  border-radius: 18px;
+  background: linear-gradient(135deg,#1e3a8a,#1f6f78);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* GRID */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+/* TEXT */
+.about-lead {
+  color: #64748b;
+  margin-bottom: 30px;
+  line-height: 1.7;
+}
+
+/* STATS */
+.about-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.about-stat-card {
+  background: white;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+
+.about-stat-card:hover {
+  transform: translateY(-6px);
+}
+
+/* ICON */
+.about-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg,#1e3a8a,#1f6f78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 15px;
+}
+
+/* TASKS */
+.about-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.about-task {
+  background: white;
+  padding: 18px 22px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+/* ================= SECTION TITLE ================= */
+.section-title {
+  text-align: center;
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+
+.section-sub {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 40px;
+}
+
+
+
+/* ================= BOSQICHLAR ================= */
+.about-steps {
+  padding: 80px 0;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.step-card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+
+.step-card:hover {
+  transform: translateY(-6px);
+}
+
+.step-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.step-icon.blue {
+  background: linear-gradient(135deg,#1e3a8a,#2563eb);
+}
+
+.step-icon.green {
+  background: linear-gradient(135deg,#0f766e,#14b8a6);
+}
+
+.step-icon.orange {
+  background: linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.step-badge {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #64748b;
+}
+
+.step-date {
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+.step-card ul {
+  padding-left: 18px;
+  color: #475569;
+}
+
+
+
+/* ================= JAMOA ================= */
+.about-team {
+  padding: 80px 0;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.team-card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  transition: 0.3s;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  margin: auto;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 20px;
+
+  background: linear-gradient(135deg,#1e3a8a,#14b8a6);
+}
+
+.team-card p {
+  color: #64748b;
+}
+
+
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+/* ===== GOAL SECTION ===== */
+
+.about-goal {
+  display: flex;
+  gap: 60px;
+  padding: 80px 0;
+}
+
+.goal-left {
+  flex: 1;
+}
+
+.goal-left h2 {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+
+.goal-left p {
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+/* STATS GRID */
+
+.goal-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.stat-card h3 {
+  margin-top: 12px;
+}
+
+.stat-card span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ICON BOX */
+
+.icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: white;
+}
+
+.icon.globe { background: linear-gradient(135deg,#2563eb,#1e3a8a); }
+.icon.chart { background: linear-gradient(135deg,#22c55e,#15803d); }
+.icon.school { background: linear-gradient(135deg,#6366f1,#4338ca); }
+.icon.time { background: linear-gradient(135deg,#f59e0b,#d97706); }
+
+/* ===== TASKS ===== */
+
+.goal-right {
+  flex: 1;
+}
+
+.goal-right h3 {
+  margin-bottom: 20px;
+}
+
+.task {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+.task svg {
+  font-size: 20px;
+  color: #1e3a8a;
+}
+
+/* ===== STEPS ===== */
+
+.about-steps {
+  background: #f8fafc;
+  padding: 90px 0;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.step-card {
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+}
+
+.step-card span {
+  color: #64748b;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.step-card h3 {
+  margin: 10px 0;
+}
+
+.step-card p {
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.step-card ul {
+  padding-left: 18px;
+  color: #475569;
+}
+
+/* ICON COLORS */
+
+.step-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.step-icon.blue {
+  background: linear-gradient(135deg,#2563eb,#1e3a8a);
+}
+
+.step-icon.green {
+  background: linear-gradient(135deg,#10b981,#047857);
+}
+
+.step-icon.orange {
+  background: linear-gradient(135deg,#f59e0b,#d97706);
+}
+
+/* =====================================
+   ABOUT — WHOLE PAGE SOFT REVEAL FIX
+===================================== */
+
+
+/* HERO */
+.about-hero .about-badge,
+.about-hero h1,
+.about-hero p {
+  opacity: 0;
+  transform: translateY(-30px);
+  animation: aboutSoftReveal 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.about-hero h1 { animation-delay: 0.15s; }
+.about-hero p { animation-delay: 0.3s; }
+
+
+/* GOAL SECTION (maqasad + vazifalar) */
+
+.about-goal {
+  opacity: 0;
+  transform: translateY(35px);
+  animation: aboutSoftReveal 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay: 0.45s;
+}
+
+
+/* STATS CARDS */
+
+.goal-stats .stat-card {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: aboutSoftReveal 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.goal-stats .stat-card:nth-child(1){animation-delay:0.6s;}
+.goal-stats .stat-card:nth-child(2){animation-delay:0.75s;}
+.goal-stats .stat-card:nth-child(3){animation-delay:0.9s;}
+.goal-stats .stat-card:nth-child(4){animation-delay:1.05s;}
+
+
+/* TASK LIST */
+
+.goal-right .task {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: aboutSoftReveal 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.goal-right .task:nth-child(1){animation-delay:0.7s;}
+.goal-right .task:nth-child(2){animation-delay:0.85s;}
+.goal-right .task:nth-child(3){animation-delay:1s;}
+.goal-right .task:nth-child(4){animation-delay:1.15s;}
+
+
+/* STEPS */
+
+.steps-grid .step-card {
+  opacity: 0;
+  transform: translateY(45px);
+  animation: aboutSoftReveal 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.steps-grid .step-card:nth-child(1){animation-delay:1.2s;}
+.steps-grid .step-card:nth-child(2){animation-delay:1.35s;}
+.steps-grid .step-card:nth-child(3){animation-delay:1.5s;}
+
+
+/* TEAM */
+
+.team-grid .team-card {
+  opacity: 0;
+  transform: translateY(45px);
+  animation: aboutSoftReveal 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.team-grid .team-card:nth-child(1){animation-delay:1.6s;}
+.team-grid .team-card:nth-child(2){animation-delay:1.75s;}
+.team-grid .team-card:nth-child(3){animation-delay:1.9s;}
+.team-grid .team-card:nth-child(4){animation-delay:2.05s;}
+
+
+/* KEYFRAME */
+
+@keyframes aboutSoftReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

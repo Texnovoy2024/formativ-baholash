@@ -16,8 +16,11 @@ export default function ProjectBuilderPage() {
 
   const storedUser = localStorage.getItem("currentUser")
   const currentUser = storedUser ? JSON.parse(storedUser) : null
+  const tasksKey = `tasks_${currentUser?.id}`
 
-  const tasks = currentUser?.tasks || []
+  const tasks = (() => {
+    try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
+  })()
   const task = tasks.find(t => String(t.id) === String(taskId))
 
   const [deadline, setDeadline] = useState("")
@@ -88,6 +91,7 @@ export default function ProjectBuilderPage() {
 
     const updatedUser = { ...currentUser, tasks: updatedTasks }
     localStorage.setItem("currentUser", JSON.stringify(updatedUser))
+    localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
 
     setIsSaved(true)
     setTimeout(() => setIsSaved(false), 2000)
@@ -115,6 +119,7 @@ export default function ProjectBuilderPage() {
 
     const updatedUser = { ...currentUser, tasks: updatedTasks }
     localStorage.setItem("currentUser", JSON.stringify(updatedUser))
+    localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
 
     /* GLOBAL PROJECT LIST UPDATE */
     const allProjects =
@@ -146,6 +151,7 @@ export default function ProjectBuilderPage() {
     )
 
     setIsPublished(true)
+    navigate('/teacher/tasks')
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useMemo } from 'react'
 import {
 	PlusCircle,
@@ -24,9 +24,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
 export default function ExamBuilder() {
 	const { taskId } = useParams()
+	const navigate = useNavigate()
 
 	const currentUser = JSON.parse(localStorage.getItem('currentUser'))
-	const tasks = currentUser?.tasks || []
+	const tasksKey = `tasks_${currentUser?.id}`
+	const tasks = (() => {
+		try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
+	})()
 
 	const taskIndex = tasks.findIndex(t => Number(t.id) === Number(taskId))
 
@@ -99,10 +103,7 @@ export default function ExamBuilder() {
 			isPublished,
 		}
 
-		localStorage.setItem(
-			'currentUser',
-			JSON.stringify({ ...currentUser, tasks: updatedTasks }),
-		)
+		localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
 
 		setTimeout(() => {
 			setIsSaving(false)
@@ -487,6 +488,7 @@ export default function ExamBuilder() {
     maxTotalPoints,
     questions,
     teacherId: currentUser.id,
+    classId: task.classId || null,
     isPublished: true,
   }
 
@@ -502,6 +504,7 @@ export default function ExamBuilder() {
 
   setIsPublished(true)
   saveToStorage(questions)
+  navigate('/teacher/tasks')
 }}
 			>
 				{isPublished ? 'E’lon qilingan ✓' : 'Imtihonni e’lon qilish'}{' '}

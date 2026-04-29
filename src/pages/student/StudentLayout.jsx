@@ -19,7 +19,7 @@ export default function StudentLayout() {
 
 				<h3>Mening panelim</h3>
 
-				<div className="user-mini">Student</div>
+				<div className="user-mini">{JSON.parse(localStorage.getItem('currentUser'))?.name || "O'quvchi"}</div>
 			</header>
 
 			<aside className={`student-sidebar ${open ? "open" : ""}`}>
@@ -38,6 +38,10 @@ export default function StudentLayout() {
 
 						<NavLink to="/student/results" onClick={() => setOpen(false)}>
 							Natijalar
+						</NavLink>
+
+						<NavLink to="/student/profile" onClick={() => setOpen(false)}>
+							Profil
 						</NavLink>
 					</nav>
 				</div>

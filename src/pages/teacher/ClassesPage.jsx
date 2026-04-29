@@ -7,8 +7,15 @@ const ClassesPage = () => {
   const navigate = useNavigate();
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const storageKey = `classes_${currentUser?.id}`;
 
-  const [classes, setClasses] = useState(currentUser?.classes || []);
+  const [classes, setClasses] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(storageKey)) || [];
+    } catch {
+      return [];
+    }
+  });
   const [newClass, setNewClass] = useState("");
 
   const handleAddClass = () => {
@@ -25,12 +32,7 @@ const ClassesPage = () => {
     ];
 
     setClasses(updatedClasses);
-
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({ ...currentUser, classes: updatedClasses })
-    );
-
+    localStorage.setItem(storageKey, JSON.stringify(updatedClasses));
     setNewClass("");
   };
 

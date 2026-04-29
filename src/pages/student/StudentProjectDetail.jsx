@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import {
   Clock,
@@ -12,6 +12,7 @@ import "./StudentProjectDetail.css"
 
 export default function StudentProjectDetail() {
   const { projectId } = useParams()
+  const navigate = useNavigate()
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
   const allProjects = JSON.parse(localStorage.getItem("allProjects")) || []
@@ -95,6 +96,7 @@ export default function StudentProjectDetail() {
       )
 
       setIsSubmitted(true)
+      navigate('/student/tasks')
     }
 
     reader.readAsDataURL(selectedFile)

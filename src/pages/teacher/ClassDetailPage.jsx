@@ -16,7 +16,10 @@ export default function ClassDetailPage() {
   const navigate = useNavigate();
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const classes = currentUser?.classes || [];
+  const classesKey = `classes_${currentUser?.id}`;
+  const classes = (() => {
+    try { return JSON.parse(localStorage.getItem(classesKey)) || [] } catch { return [] }
+  })();
 
   const selectedClass = classes.find(
     (c) => Number(c.id) === Number(classId)
@@ -58,10 +61,7 @@ export default function ClassDetailPage() {
         : c
     );
 
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({ ...currentUser, classes: updatedClasses })
-    );
+    localStorage.setItem(classesKey, JSON.stringify(updatedClasses));
   };
 
   /* ================= CLASS UPDATE ================= */
@@ -73,15 +73,8 @@ export default function ClassDetailPage() {
   };
 
   const confirmDeleteClass = () => {
-    const updatedClasses = classes.filter(
-      (c) => c.id !== selectedClass.id
-    );
-
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({ ...currentUser, classes: updatedClasses })
-    );
-
+    const updatedClasses = classes.filter((c) => c.id !== selectedClass.id);
+    localStorage.setItem(classesKey, JSON.stringify(updatedClasses));
     navigate("/teacher/classes");
   };
 

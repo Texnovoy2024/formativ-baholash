@@ -12,13 +12,27 @@ export default function StudentTasksPage() {
     JSON.parse(localStorage.getItem("currentUser")) || {}
 
   useEffect(() => {
-    const allExams =
-      JSON.parse(localStorage.getItem("allExams")) || []
-    const allProjects =
-      JSON.parse(localStorage.getItem("allProjects")) || []
+    const allExams = JSON.parse(localStorage.getItem("allExams")) || []
+    const allProjects = JSON.parse(localStorage.getItem("allProjects")) || []
 
-    setExams(allExams.filter(e => e.isPublished))
-    setProjects(allProjects.filter(p => p.isPublished))
+    const studentClassId = currentUser?.classId
+
+    // Agar studentda classId bo'lsa — faqat o'sha sinfning topshiriqlari
+    // Agar classId yo'q bo'lsa — barcha publish qilingan topshiriqlar
+    const examFilter = e => {
+      if (!e.isPublished) return false
+      if (!studentClassId) return true
+      return !e.classId || String(e.classId) === String(studentClassId)
+    }
+
+    const projectFilter = p => {
+      if (!p.isPublished) return false
+      if (!studentClassId) return true
+      return !p.classId || String(p.classId) === String(studentClassId)
+    }
+
+    setExams(allExams.filter(examFilter))
+    setProjects(allProjects.filter(projectFilter))
   }, [])
 
   const results =

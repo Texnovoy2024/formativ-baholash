@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './routes/ProtectedRoute'
 
 /* Layout Components */
@@ -14,22 +15,24 @@ import Methodology from './components/Methodology/Methodology'
 import CTA from './components/CTA/CTA'
 
 /* Pages */
-import Register from './pages/Register/Register'
 import Login from './pages/Login/Login'
 import Metodika from './pages/Metodika/Metodika'
 import About from './pages/About/About'
 
 /* Teacher */
 import TeacherLayout from './pages/teacher/TeacherLayout'
-import AddTeacherPage from './pages/teacher/AddTeacherPage'
 import TeacherDashboard from './pages/teacher/TeacherDashboard'
-import ClassesPage from './pages/teacher/ClassesPage'
-import ClassDetailPage from './pages/teacher/ClassDetailPage'
 import TeacherTasksPage from './pages/teacher/TeacherTasksPage'
 import TeacherResultsPage from './pages/teacher/TeacherResultsPage'
+import TeacherProfilePage from './pages/teacher/TeacherProfilePage'
 import ExamBuilder from './pages/teacher/ExamBuilder'
 import ProjectBuilderPage from './pages/teacher/ProjectBuilderPage'
 import ProjectSubmissionsPage from './pages/teacher/ProjectSubmissionsPage'
+
+/* Admin */
+import AdminPanel from './pages/admin/AdminPanel'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AllUsersPage from './pages/admin/AllUsersPage'
 
 /* Student */
 import StudentLayout from './pages/student/StudentLayout'
@@ -39,6 +42,7 @@ import StudentExamPage from './pages/student/StudentExamPage'
 import StudentResultsPage from './pages/student/StudentResultsPage'
 import StudentProjectPage from './pages/student/StudentProjectPage'
 import StudentProjectDetail from './pages/student/StudentProjectDetail'
+import StudentProfilePage from './pages/student/StudentProfilePage'
 
 /* ================= HOME ================= */
 function Home() {
@@ -65,10 +69,18 @@ function MainLayout({ children }) {
 	)
 }
 
+/* ================= TEACHER OR ADMIN DASHBOARD ================= */
+function TeacherOrAdminDashboard() {
+	const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+	if (currentUser?.role === 'admin') return <AdminDashboard />
+	return <TeacherDashboard />
+}
+
 /* ================= APP ================= */
 function App() {
 	return (
 		<BrowserRouter>
+			<AuthProvider>
 			<Routes>
 				{/* ===== PUBLIC (Navbar + Footer bor) ===== */}
 				<Route
@@ -98,9 +110,10 @@ function App() {
 					}
 				/>
 
-				{/* ===== AUTH (Navbar yo‘q) ===== */}
+				{/* ===== AUTH (Navbar yo'q) ===== */}
 				<Route path='/login' element={<Login />} />
-				<Route path='/register' element={<Register />} />
+				{/* /register bloklangan — /login ga yo'naltirish (Talab 3.1, 3.4) */}
+				<Route path='/register' element={<Navigate to='/login' replace />} />
 
 				{/* ================= TEACHER PANEL ================= */}
 				<Route
@@ -111,19 +124,30 @@ function App() {
 						</ProtectedRoute>
 					}
 				>
-					<Route index element={<TeacherDashboard />} />
 					<Route
-						path='add-teacher'
+						index
+						element={<TeacherOrAdminDashboard />}
+					/>
+					{/* Admin paneli — foydalanuvchilarni boshqarish (Talab 2, 5) */}
+					<Route
+						path='admin'
 						element={
 							<ProtectedRoute allowedRole='admin'>
-								<AddTeacherPage />
+								<AdminPanel />
 							</ProtectedRoute>
 						}
 					/>
-					<Route path='classes' element={<ClassesPage />} />
-					<Route path='classes/:classId' element={<ClassDetailPage />} />
+					<Route
+						path='all-users'
+						element={
+							<ProtectedRoute allowedRole='admin'>
+								<AllUsersPage />
+							</ProtectedRoute>
+						}
+					/>
 					<Route path='tasks' element={<TeacherTasksPage />} />
 					<Route path='results' element={<TeacherResultsPage />} />
+					<Route path='profile' element={<TeacherProfilePage />} />
 					<Route path='exam-builder/:taskId' element={<ExamBuilder />} />
 					<Route
 						path='project-builder/:taskId'
@@ -149,12 +173,11 @@ function App() {
 					<Route path='exam/:examId' element={<StudentExamPage />} />
 					<Route path='results' element={<StudentResultsPage />} />
 					<Route path='projects' element={<StudentProjectPage />} />
-					<Route
-						path='projects/:projectId'
-						element={<StudentProjectDetail />}
-					/>
+					<Route path='projects/:projectId' element={<StudentProjectDetail />} />
+					<Route path='profile' element={<StudentProfilePage />} />
 				</Route>
 			</Routes>
+			</AuthProvider>
 		</BrowserRouter>
 	)
 }

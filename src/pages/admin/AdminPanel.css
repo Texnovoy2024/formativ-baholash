@@ -1,0 +1,430 @@
+/* AdminPanel — AddTeacherPage uslubida qurilgan */
+
+.admin-panel-container {
+  max-width: 650px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+
+/* ── TABS ─────────────────────────────────────────────────────────────────── */
+
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.admin-tab.active {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  border-color: transparent;
+  color: white;
+}
+
+.admin-tab:hover:not(.active) {
+  background: #e0ecff;
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+/* ── FORM CARD ────────────────────────────────────────────────────────────── */
+
+.teacher-form-card {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.form-icon {
+  width: 42px;
+  height: 42px;
+  background: #e0ecff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+}
+
+.add-teacher-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.add-teacher-form input {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f1f5f9;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.add-teacher-form input:focus {
+  border-color: #3b82f6;
+  background: white;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 44px;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.primary-btn {
+  margin-top: 4px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+.admin-error-msg {
+  color: #dc2626;
+  font-size: 13px;
+  background: #fee2e2;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.admin-select {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f1f5f9;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  cursor: pointer;
+  color: #0f172a;
+}
+
+.admin-select:focus {
+  border-color: #3b82f6;
+  background: white;
+}
+
+.admin-new-class-input {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid #3b82f6;
+  background: #eff6ff;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  color: #0f172a;
+  transition: border-color 0.2s;
+}
+
+.admin-new-class-input:focus {
+  background: white;
+}
+
+/* ── LIST CARD ────────────────────────────────────────────────────────────── */
+
+.teacher-list-card {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.empty-msg {
+  color: #9ca3af;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
+}
+
+/* ── TABLE ────────────────────────────────────────────────────────────────── */
+
+.teacher-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.teacher-table th {
+  background: #f1f5f9;
+  padding: 12px;
+  text-align: left;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.teacher-table td {
+  padding: 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* ── ROLE BADGE ───────────────────────────────────────────────────────────── */
+
+.role-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.role-badge.role-teacher {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.role-badge.role-student {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* ── MOBILE CARDS ─────────────────────────────────────────────────────────── */
+
+.teacher-cards {
+  display: none;
+}
+
+.teacher-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.teacher-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0ecff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #2563eb;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.teacher-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.teacher-email {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* ── DELETE BUTTON ────────────────────────────────────────────────────────── */
+
+.delete-btn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background: #fecaca;
+  transform: scale(1.08);
+}
+
+.delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── MODALS ───────────────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: #ffffff;
+  padding: 24px 20px;
+  border-radius: 18px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+  animation: modalFade 0.25s ease;
+}
+
+.modal-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-icon.success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.modal-icon.delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.modal-box h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.modal-box p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 18px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-primary {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-cancel {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #f1f5f9;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.btn-danger {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .teacher-table {
+    display: none;
+  }
+
+  .teacher-cards {
+    display: block;
+  }
+}

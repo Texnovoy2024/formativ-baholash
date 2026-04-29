@@ -118,7 +118,7 @@ const StudentDashboard = () => {
 
       {totalTasks > 0 && (
         <div className="chart-container">
-          <h3>Ball Progress Grafigi</h3>
+          <h3>Ball o'sish grafigi</h3>
 
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>

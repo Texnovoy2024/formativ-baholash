@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import {
   CheckCircle,
@@ -6,12 +6,14 @@ import {
   FileText,
   User,
   Award,
-  Download
+  Download,
+  ArrowLeft
 } from "lucide-react"
 import "./ProjectSubmissionsPage.css"
 
 export default function ProjectSubmissionsPage() {
   const { projectId } = useParams()
+  const navigate = useNavigate()
 
   const users = JSON.parse(localStorage.getItem("users")) || []
   const submissions =
@@ -52,6 +54,9 @@ export default function ProjectSubmissionsPage() {
   if (localSubmissions.length === 0) {
     return (
       <div className="tp-empty">
+        <button className="tp-back-btn" onClick={() => navigate('/teacher/tasks')}>
+          <ArrowLeft size={16} /> Topshiriqlarga qaytish
+        </button>
         <h2>Hali hech kim topshirmagan</h2>
       </div>
     )
@@ -59,7 +64,12 @@ export default function ProjectSubmissionsPage() {
 
   return (
     <div className="tp-container">
-      <h1 className="tp-title">Topshirilgan Projectlar</h1>
+      <div className="tp-header-row">
+        <button className="tp-back-btn" onClick={() => navigate('/teacher/tasks')}>
+          <ArrowLeft size={16} /> Orqaga
+        </button>
+        <h1 className="tp-title">Topshirilgan Projectlar</h1>
+      </div>
 
       <div className="tp-grid">
         {localSubmissions.map(sub => {

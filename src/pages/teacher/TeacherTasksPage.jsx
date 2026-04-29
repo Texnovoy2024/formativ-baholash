@@ -6,8 +6,31 @@ import { useNavigate } from "react-router-dom"
 
 export default function TeacherTasksPage() {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
-  const initialTasks = currentUser?.tasks || []
-  const classes = currentUser?.classes || []
+  const tasksKey = `tasks_${currentUser?.id}`
+
+  const initialTasks = (() => {
+    try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
+  })()
+
+  // Admin yaratgan sinflar + teacher sinflarini birlashtirish
+  const classes = (() => {
+    const result = []
+    try {
+      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
+      adminClasses.forEach(c => result.push(c))
+    } catch { /* skip */ }
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('users')) || []
+      const teachers = storedUsers.filter(u => u.role === 'teacher')
+      teachers.forEach(t => {
+        const tc = JSON.parse(localStorage.getItem(`classes_${t.id}`)) || []
+        tc.forEach(c => {
+          if (!result.find(r => String(r.id) === String(c.id))) result.push(c)
+        })
+      })
+    } catch { /* skip */ }
+    return result
+  })()
   const navigate = useNavigate()
 
   const [tasks, setTasks] = useState(initialTasks)
@@ -26,10 +49,7 @@ export default function TeacherTasksPage() {
   const [deleteId, setDeleteId] = useState(null)
 
   const updateStorage = updatedTasks => {
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({ ...currentUser, tasks: updatedTasks })
-    )
+    localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
   }
 
   const handleAddTask = () => {
@@ -193,7 +213,7 @@ export default function TeacherTasksPage() {
             )}
 
             <span className={`teacher-badge teacher-badge--${task.type}`}>
-              {task.type}
+              {task.type === 'test' ? 'Test' : task.type === 'project' ? 'Loyiha' : task.type === 'homework' ? 'Vazifa' : task.type === 'quiz' ? 'Test' : task.type}
             </span>
 
             {editingId === task.id ? (

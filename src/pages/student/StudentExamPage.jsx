@@ -79,10 +79,17 @@ export default function StudentExamPage() {
       examId: exam.id,
       examTitle: exam.examTitle,
       studentId: currentUser.id,
-      studentName: currentUser.fullName,
+      studentName: currentUser.name || currentUser.fullName || 'Noma\'lum',
       score,
       total: exam.questions.reduce((sum, q) => sum + q.points, 0),
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      answers: exam.questions.map(q => ({
+        questionId: q.id,
+        questionText: q.text,
+        correct: answers[q.id] === q.correctIndex,
+        chosen: answers[q.id],
+        correctIndex: q.correctIndex,
+      }))
     })
 
     localStorage.setItem("examResults", JSON.stringify(results))

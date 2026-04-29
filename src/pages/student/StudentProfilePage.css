@@ -1,0 +1,236 @@
+.spp-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+
+.spp-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.spp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.spp-full { grid-column: 1 / -1; }
+
+.spp-card {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.spp-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f172a;
+}
+
+.spp-avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.spp-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spp-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.spp-role-badge {
+  display: inline-block;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.spp-class-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: #7c3aed;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.spp-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.spp-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #6b7280;
+}
+
+.spp-info-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.spp-info-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 2px 0 0;
+}
+
+.spp-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.spp-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.spp-stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spp-stat-icon.blue   { background: #dbeafe; color: #2563eb; }
+.spp-stat-icon.green  { background: #dcfce7; color: #16a34a; }
+.spp-stat-icon.purple { background: #ede9fe; color: #7c3aed; }
+.spp-stat-icon.orange { background: #fef3c7; color: #d97706; }
+
+.spp-stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.spp-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 2px 0 0;
+}
+
+.spp-pw-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: end;
+}
+
+.spp-pw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spp-pw-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.spp-pw-input {
+  position: relative;
+}
+
+.spp-pw-input input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 40px 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.spp-pw-input input:focus {
+  border-color: #10b981;
+  background: white;
+}
+
+.spp-pw-input span {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.spp-msg {
+  grid-column: 1 / -1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spp-msg.success { background: #dcfce7; color: #15803d; }
+.spp-msg.error   { background: #fee2e2; color: #dc2626; }
+
+.spp-save-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #10b981, #059669);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.spp-save-btn:hover { opacity: 0.9; }
+
+@media (max-width: 768px) {
+  .spp-grid { grid-template-columns: 1fr; }
+  .spp-pw-form { grid-template-columns: 1fr; }
+  .spp-stats-grid { grid-template-columns: 1fr 1fr; }
+}

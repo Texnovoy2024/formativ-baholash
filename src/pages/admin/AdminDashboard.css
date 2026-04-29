@@ -1,0 +1,94 @@
+.admin-dashboard-container {
+  padding: 40px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.admin-dashboard-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* GRID */
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+/* CARD */
+.admin-dashboard-card {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: 0.2s ease;
+}
+
+.admin-dashboard-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ICON WRAPPER */
+.admin-card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-card-icon.blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-card-icon.green {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.admin-card-icon.purple {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+/* TEXT */
+.admin-card-label {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-dashboard-card h2 {
+  font-size: 26px;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .admin-dashboard-container {
+    padding: 20px 16px;
+  }
+
+  .admin-dashboard-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .admin-dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .admin-dashboard-card {
+    padding: 18px;
+  }
+}

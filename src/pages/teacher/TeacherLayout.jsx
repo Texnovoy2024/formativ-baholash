@@ -1,20 +1,24 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import './TeacherLayout.css'
 
 export default function TeacherLayout() {
 	const [open, setOpen] = useState(false)
-	const navigate = useNavigate()
+	const { logout } = useAuth()
 	const [currentUser, setCurrentUser] = useState(null)
 
 	useEffect(() => {
-		const user = JSON.parse(localStorage.getItem('currentUser'))
-		setCurrentUser(user)
+		try {
+			const user = JSON.parse(localStorage.getItem('currentUser'))
+			setCurrentUser(user)
+		} catch {
+			setCurrentUser(null)
+		}
 	}, [])
 
 	const handleLogout = () => {
-		localStorage.removeItem('currentUser')
-		navigate('/')
+		logout()
 	}
 
 	const handleLinkClick = () => {
@@ -38,29 +42,42 @@ export default function TeacherLayout() {
 
 			<aside className={`teacher-sidebar ${open ? 'open' : ''}`}>
 				<div>
-					<h2 className='sidebar-title'>O'qituvchi oynasi</h2>
+					<h2 className='sidebar-title'>
+						{currentUser?.role === 'admin' ? 'Admin oynasi' : "O'qituvchi oynasi"}
+					</h2>
 
 					<nav className='sidebar-nav'>
 						<NavLink to='/teacher' end onClick={handleLinkClick}>
 							Boshqaruv paneli
 						</NavLink>
 
-						<NavLink to='/teacher/classes' onClick={handleLinkClick}>
-							Sinflar
-						</NavLink>
+						{/* Admin uchun teacher funksiyalari ko'rsatilmaydi */}
+						{currentUser?.role !== 'admin' && (
+							<>
+								<NavLink to='/teacher/tasks' onClick={handleLinkClick}>
+									Topshiriqlar
+								</NavLink>
 
-						<NavLink to='/teacher/tasks' onClick={handleLinkClick}>
-							Topshiriqlar
-						</NavLink>
+								<NavLink to='/teacher/results' onClick={handleLinkClick}>
+									Natijalar
+								</NavLink>
 
-						<NavLink to='/teacher/results' onClick={handleLinkClick}>
-							Natijalar
-						</NavLink>
+								<NavLink to='/teacher/profile' onClick={handleLinkClick}>
+									Profil
+								</NavLink>
+							</>
+						)}
 
+						{/* Admin uchun foydalanuvchilar boshqaruvi (Talab 4.1) */}
 						{currentUser?.role === 'admin' && (
-							<NavLink to='/teacher/add-teacher' onClick={handleLinkClick}>
-								O'qituvchi qo'shish
-							</NavLink>
+							<>
+								<NavLink to='/teacher/admin' onClick={handleLinkClick}>
+									Foydalanuvchilar boshqaruvi
+								</NavLink>
+								<NavLink to='/teacher/all-users' onClick={handleLinkClick}>
+									Barcha foydalanuvchilar
+								</NavLink>
+							</>
 						)}
 					</nav>
 				</div>
@@ -69,7 +86,7 @@ export default function TeacherLayout() {
 					{currentUser && (
 						<div className='user-box'>
 							<p>{currentUser.name}</p>
-							<span>{currentUser.role}</span>
+							<span>{currentUser.role === 'admin' ? 'Admin' : currentUser.role === 'teacher' ? "O'qituvchi" : "O'quvchi"}</span>
 						</div>
 					)}
 

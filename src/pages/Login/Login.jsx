@@ -15,6 +15,7 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [showPass, setShowPass] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,28 +23,31 @@ const Login = () => {
   });
 
   const handleChange = (e) => {
+    setErrorMsg("");
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-const handleLogin = (e) => {
-  e.preventDefault();
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setErrorMsg("");
 
-  const result = login(formData.email, formData.password);
+    const result = login(formData.email, formData.password);
 
-  if (!result.success) {
-    alert(result.message);
-    return;
-  }
+    if (!result.success) {
+      setErrorMsg(result.message);
+      return;
+    }
 
-  if (result.role === "admin" || result.role === "teacher") {
-    navigate("/teacher");
-  } else {
-    navigate("/student");
-  }
-};
+    // Rol asosida yo'naltirish (Talab 4.1, 4.2, 4.3)
+    if (result.role === "admin" || result.role === "teacher") {
+      navigate("/teacher");
+    } else {
+      navigate("/student");
+    }
+  };
 
   return (
     <div className="login-page">
@@ -96,6 +100,11 @@ const handleLogin = (e) => {
           </div>
         </div>
 
+        {/* Xato xabari (Talab 4.4) */}
+        {errorMsg && (
+          <p className="login-error">{errorMsg}</p>
+        )}
+
         <button
           type="submit"
           className="login-btn"
@@ -103,12 +112,7 @@ const handleLogin = (e) => {
           Kirish
         </button>
 
-        <p className="switch-text">
-          Hisobingiz yo'qmi?
-          <span onClick={() => navigate("/register")}>
-            Ro'yxatdan o'ting
-          </span>
-        </p>
+        {/* "Ro'yxatdan o'ting" havolasi olib tashlandi (Talab 3.2) */}
 
       </form>
 

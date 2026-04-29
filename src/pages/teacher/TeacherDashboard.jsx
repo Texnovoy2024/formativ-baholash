@@ -9,18 +9,49 @@ import "./TeacherDashboard.css";
 export default function TeacherDashboard() {
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const classes = currentUser?.classes || [];
+
+  // Teacher o'z sinflari + admin yaratgan sinflar
+  const classes = (() => {
+    const result = []
+    try {
+      const tc = JSON.parse(localStorage.getItem(`classes_${currentUser?.id}`)) || []
+      tc.forEach(c => result.push(c))
+    } catch { /* skip */ }
+    try {
+      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
+      adminClasses.forEach(c => {
+        if (!result.find(r => String(r.id) === String(c.id))) result.push(c)
+      })
+    } catch { /* skip */ }
+    return result
+  })();
+  const tasks = (() => {
+    try { return JSON.parse(localStorage.getItem(`tasks_${currentUser?.id}`)) || [] } catch { return [] }
+  })();
 
   /* ================= STATS ================= */
 
   const totalStudents = useMemo(() => {
-    return classes.reduce(
-      (acc, cls) => acc + (cls.students?.length || 0),
-      0
-    );
+    // Teacher sinflaridagi o'quvchilar (students massivi orqali)
+    const fromClasses = classes.reduce(
+      (acc, cls) => acc + (cls.students?.length || 0), 0
+    )
+    // Admin sinflariga biriktirilgan o'quvchilar (users.classId orqali)
+    const adminClassIds = (() => {
+      try {
+        return (JSON.parse(localStorage.getItem('admin_classes')) || []).map(c => String(c.id))
+      } catch { return [] }
+    })()
+    const fromAdminClasses = (() => {
+      try {
+        const users = JSON.parse(localStorage.getItem('users')) || []
+        return users.filter(u => u.role === 'student' && adminClassIds.includes(String(u.classId))).length
+      } catch { return 0 }
+    })()
+    return fromClasses + fromAdminClasses
   }, [classes]);
 
-  const totalTasks = currentUser?.tasks?.length || 0;
+  const totalTasks = tasks.length || 0;
 
   return (
     <div className="dashboard-container">

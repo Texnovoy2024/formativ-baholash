@@ -9,6 +9,11 @@ import {
   ResponsiveContainer
 } from "recharts"
 import "./StudentDashboard.css"
+import {
+  getExamResultsFn,
+  getProjectSubmissionsFn,
+  getStoredUsers,
+} from "../../context/authUtils"
 
 const StudentDashboard = () => {
   const [chartData, setChartData] = useState([])
@@ -17,87 +22,64 @@ const StudentDashboard = () => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
 
   useEffect(() => {
-    const allExamResults =
-      JSON.parse(localStorage.getItem("examResults")) || []
+    const load = async () => {
+      const [allExamResults, allProjectSubmissions, allUsers] =
+        await Promise.all([
+          getExamResultsFn(),
+          getProjectSubmissionsFn(),
+          getStoredUsers(),
+        ])
 
-    const allProjectSubmissions =
-      JSON.parse(localStorage.getItem("projectSubmissions")) || []
+      const myExamResults = allExamResults.filter(
+        r => r.studentId === currentUser?.id
+      )
+      const myProjectResults = allProjectSubmissions.filter(
+        s =>
+          String(s.studentId) === String(currentUser?.id) &&
+          s.score !== null
+      )
 
-    const allUsers =
-      JSON.parse(localStorage.getItem("users")) || []
+      const formattedExams = myExamResults.map((r, index) => ({
+        name: `Test ${index + 1}`,
+        score: r.score,
+      }))
+      const formattedProjects = myProjectResults.map((p, index) => ({
+        name: `Loyiha ${index + 1}`,
+        score: p.score,
+      }))
 
-    /* ================= CURRENT USER RESULTS ================= */
+      setChartData([...formattedExams, ...formattedProjects])
 
-    const myExamResults = allExamResults.filter(
-      r => r.studentId === currentUser?.id
-    )
+      const rankingData = allUsers
+        .filter(u => u.role === "student")
+        .map(student => {
+          const studentExams = allExamResults.filter(
+            r => r.studentId === student.id
+          )
+          const studentProjects = allProjectSubmissions.filter(
+            s => String(s.studentId) === String(student.id) && s.score !== null
+          )
+          const allScores = [
+            ...studentExams.map(r => r.score),
+            ...studentProjects.map(p => p.score),
+          ]
+          const avg =
+            allScores.length > 0
+              ? allScores.reduce((a, b) => a + b, 0) / allScores.length
+              : 0
+          return { name: student.name, avg }
+        })
+        .sort((a, b) => b.avg - a.avg)
 
-    const myProjectResults = allProjectSubmissions.filter(
-      s =>
-        String(s.studentId) === String(currentUser?.id) &&
-        s.score !== null
-    )
-
-    // Chart uchun format
-    const formattedExams = myExamResults.map((r, index) => ({
-      name: `Test ${index + 1}`,
-      score: r.score
-    }))
-
-    const formattedProjects = myProjectResults.map((p, index) => ({
-      name: `Loyiha ${index + 1}`,
-      score: p.score
-    }))
-
-    const mergedChart = [...formattedExams, ...formattedProjects]
-
-    setChartData(mergedChart)
-
-    /* ================= RANKING ================= */
-
-    const rankingData = allUsers
-      .filter(u => u.role === "student")
-      .map(student => {
-        const studentExams = allExamResults.filter(
-          r => r.studentId === student.id
-        )
-
-        const studentProjects = allProjectSubmissions.filter(
-          s =>
-            String(s.studentId) === String(student.id) &&
-            s.score !== null
-        )
-
-        const examScores = studentExams.map(r => r.score)
-        const projectScores = studentProjects.map(p => p.score)
-
-        const allScores = [...examScores, ...projectScores]
-
-        const avg =
-          allScores.length > 0
-            ? allScores.reduce((a, b) => a + b, 0) / allScores.length
-            : 0
-
-        return {
-          name: student.name,
-          avg
-        }
-      })
-      .sort((a, b) => b.avg - a.avg)
-
-    setRanking(rankingData)
-
+      setRanking(rankingData)
+    }
+    load()
   }, [])
 
-  /* ================= STATS ================= */
-
   const totalTasks = chartData.length
-
   const average =
     totalTasks > 0
-      ? (
-          chartData.reduce((a, b) => a + b.score, 0) / totalTasks
-        ).toFixed(1)
+      ? (chartData.reduce((a, b) => a + b.score, 0) / totalTasks).toFixed(1)
       : 0
 
   return (
@@ -109,9 +91,8 @@ const StudentDashboard = () => {
           <h3>Umumiy topshiriqlar</h3>
           <p>{totalTasks}</p>
         </div>
-
         <div className="stat-card">
-          <h3>O‘rtacha ball</h3>
+          <h3>O'rtacha ball</h3>
           <p>{average}</p>
         </div>
       </div>
@@ -119,7 +100,6 @@ const StudentDashboard = () => {
       {totalTasks > 0 && (
         <div className="chart-container">
           <h3>Ball o'sish grafigi</h3>
-
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -134,8 +114,6 @@ const StudentDashboard = () => {
               />
             </LineChart>
           </ResponsiveContainer>
-
-          
         </div>
       )}
     </div>

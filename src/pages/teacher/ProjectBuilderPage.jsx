@@ -9,19 +9,17 @@ import {
   Send
 } from "lucide-react"
 import "./ProjectBuilderPage.css"
+import { getTasksFn, saveTasksFn, saveProjectFn } from "../../context/authUtils"
 
 export default function ProjectBuilderPage() {
   const { taskId } = useParams()
   const navigate = useNavigate()
 
-  const storedUser = localStorage.getItem("currentUser")
-  const currentUser = storedUser ? JSON.parse(storedUser) : null
-  const tasksKey = `tasks_${currentUser?.id}`
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"))
 
-  const tasks = (() => {
-    try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
-  })()
-  const task = tasks.find(t => String(t.id) === String(taskId))
+  const [tasks, setTasks] = useState([])
+  const [task, setTask] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const [deadline, setDeadline] = useState("")
   const [maxScore, setMaxScore] = useState("")
@@ -29,27 +27,30 @@ export default function ProjectBuilderPage() {
   const [isSaved, setIsSaved] = useState(false)
   const [isPublished, setIsPublished] = useState(false)
 
-  /* ================= SAFE DATE FORMAT FUNCTION ================= */
   const formatToInputDate = (dateValue) => {
     if (!dateValue) return ""
-
     const dateObj = new Date(dateValue)
     if (isNaN(dateObj)) return ""
-
     return dateObj.toISOString().split("T")[0]
   }
 
-  /* ================= LOAD EXISTING DATA ================= */
   useEffect(() => {
-    if (!task) return
-
-    if (task.projectData) {
-      setDeadline(formatToInputDate(task.projectData.deadline))
-      setMaxScore(task.projectData.maxScore || "")
-      setRequirements(task.projectData.requirements || "")
-      setIsPublished(task.projectData.isPublished || false)
+    const load = async () => {
+      if (!currentUser) { setLoading(false); return }
+      const t = await getTasksFn(currentUser.id)
+      setTasks(t)
+      const found = t.find(x => String(x.id) === String(taskId))
+      setTask(found || null)
+      if (found?.projectData) {
+        setDeadline(formatToInputDate(found.projectData.deadline))
+        setMaxScore(found.projectData.maxScore || "")
+        setRequirements(found.projectData.requirements || "")
+        setIsPublished(found.projectData.isPublished || false)
+      }
+      setLoading(false)
     }
-  }, [task])
+    load()
+  }, [taskId])
 
   if (!currentUser) {
     return (
@@ -60,19 +61,19 @@ export default function ProjectBuilderPage() {
     )
   }
 
+  if (loading) return <div style={{ padding: 40 }}><p>Yuklanmoqda...</p></div>
+
   if (!task) {
     return (
       <div style={{ padding: 40 }}>
         <h2>Project topilmadi</h2>
-        <button onClick={() => navigate("/teacher/tasks")}>
-          Orqaga qaytish
-        </button>
+        <button onClick={() => navigate("/teacher/tasks")}>Orqaga qaytish</button>
       </div>
     )
   }
 
   /* ================= SAVE ================= */
-  const handleSave = () => {
+  const handleSave = async () => {
     const updatedTasks = tasks.map(t =>
       String(t.id) === String(taskId)
         ? {
@@ -88,17 +89,14 @@ export default function ProjectBuilderPage() {
           }
         : t
     )
-
-    const updatedUser = { ...currentUser, tasks: updatedTasks }
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser))
-    localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
-
+    await saveTasksFn(currentUser.id, updatedTasks)
+    setTasks(updatedTasks)
     setIsSaved(true)
     setTimeout(() => setIsSaved(false), 2000)
   }
 
   /* ================= PUBLISH ================= */
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!deadline || !maxScore) return
 
     const updatedTasks = tasks.map(t =>
@@ -117,17 +115,7 @@ export default function ProjectBuilderPage() {
         : t
     )
 
-    const updatedUser = { ...currentUser, tasks: updatedTasks }
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser))
-    localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
-
-    /* GLOBAL PROJECT LIST UPDATE */
-    const allProjects =
-      JSON.parse(localStorage.getItem("allProjects")) || []
-
-    const existingIndex = allProjects.findIndex(
-      p => String(p.id) === String(taskId)
-    )
+    await saveTasksFn(currentUser.id, updatedTasks)
 
     const projectData = {
       id: task.id,
@@ -139,16 +127,7 @@ export default function ProjectBuilderPage() {
       isPublished: true,
     }
 
-    if (existingIndex !== -1) {
-      allProjects[existingIndex] = projectData
-    } else {
-      allProjects.push(projectData)
-    }
-
-    localStorage.setItem(
-      "allProjects",
-      JSON.stringify(allProjects)
-    )
+    await saveProjectFn(projectData)
 
     setIsPublished(true)
     navigate('/teacher/tasks')
@@ -159,8 +138,6 @@ export default function ProjectBuilderPage() {
       <h1 className="tpb-title">Loyiha sozlamalari</h1>
 
       <div className="tpb-card">
-
-        {/* REQUIREMENTS */}
         <div className="tpb-input-group">
           <FileText size={18} />
           <textarea
@@ -170,7 +147,6 @@ export default function ProjectBuilderPage() {
           />
         </div>
 
-        {/* DEADLINE */}
         <div className="tpb-input-group">
           <CalendarDays size={18} />
           <input
@@ -181,7 +157,6 @@ export default function ProjectBuilderPage() {
           />
         </div>
 
-        {/* MAX SCORE */}
         <div className="tpb-input-group">
           <Award size={18} />
           <input
@@ -192,19 +167,17 @@ export default function ProjectBuilderPage() {
           />
         </div>
 
-        {/* STATUS */}
         <div className="tpb-status">
           {isPublished ? (
             <span className="tpb-published">
               <CheckCircle size={16} />
-              E’lon qilingan
+              E'lon qilingan
             </span>
           ) : (
             <span className="tpb-draft">Qoralama</span>
           )}
         </div>
 
-        {/* ACTIONS */}
         <div className="tpb-actions">
           <button onClick={handleSave} className="tpb-save">
             <Save size={16} />
@@ -217,15 +190,11 @@ export default function ProjectBuilderPage() {
             disabled={!deadline || !maxScore}
           >
             <Send size={16} />
-            E’lon qilish
+            E'lon qilish
           </button>
         </div>
 
-        {isSaved && (
-          <div className="tpb-saved">
-            ✓ Saqlandi
-          </div>
-        )}
+        {isSaved && <div className="tpb-saved">✓ Saqlandi</div>}
       </div>
     </div>
   )

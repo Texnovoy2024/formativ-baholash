@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Clock,
   FileText,
@@ -9,28 +9,46 @@ import {
   File
 } from "lucide-react"
 import "./StudentProjectDetail.css"
+import {
+  getAllProjectsFn,
+  getProjectSubmissionsFn,
+  saveProjectSubmissionFn,
+} from "../../context/authUtils"
 
 export default function StudentProjectDetail() {
   const { projectId } = useParams()
   const navigate = useNavigate()
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
-  const allProjects = JSON.parse(localStorage.getItem("allProjects")) || []
-  const projectSubmissions =
-    JSON.parse(localStorage.getItem("projectSubmissions")) || []
 
-  const project = allProjects.find(
-    p => String(p.id) === String(projectId)
-  )
-
-  const existingSubmission = projectSubmissions.find(
-    s =>
-      String(s.projectId) === String(projectId) &&
-      String(s.studentId) === String(currentUser.id)
-  )
-
+  const [project, setProject] = useState(null)
+  const [existingSubmission, setExistingSubmission] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [selectedFile, setSelectedFile] = useState(null)
-  const [isSubmitted, setIsSubmitted] = useState(!!existingSubmission)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      const [projects, subs] = await Promise.all([
+        getAllProjectsFn(),
+        getProjectSubmissionsFn(),
+      ])
+      const found = projects.find(p => String(p.id) === String(projectId))
+      setProject(found || null)
+
+      const existing = subs.find(
+        s =>
+          String(s.projectId) === String(projectId) &&
+          String(s.studentId) === String(currentUser.id)
+      )
+      setExistingSubmission(existing || null)
+      setIsSubmitted(!!existing)
+      setLoading(false)
+    }
+    load()
+  }, [projectId])
+
+  if (loading) return <div style={{ padding: 40 }}><p>Yuklanmoqda...</p></div>
 
   if (!project) {
     return (
@@ -40,10 +58,7 @@ export default function StudentProjectDetail() {
     )
   }
 
-  const isLate =
-    new Date() > new Date(project.deadline) && !isSubmitted
-
-  /* ================= FILE CHANGE ================= */
+  const isLate = new Date() > new Date(project.deadline) && !isSubmitted
 
   const handleFileChange = e => {
     const file = e.target.files[0]
@@ -51,8 +66,7 @@ export default function StudentProjectDetail() {
 
     if (
       file.type !== "application/pdf" &&
-      file.type !==
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
+      file.type !== "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
       file.type !== "application/msword"
     ) {
       alert("Faqat PDF yoki Word fayl yuklash mumkin!")
@@ -62,14 +76,12 @@ export default function StudentProjectDetail() {
     setSelectedFile(file)
   }
 
-  /* ================= SUBMIT ================= */
-
   const handleSubmit = () => {
     if (!selectedFile) return
 
     const reader = new FileReader()
 
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       const newSubmission = {
         projectId: project.id,
         studentId: currentUser.id,
@@ -78,23 +90,10 @@ export default function StudentProjectDetail() {
         fileData: reader.result,
         submittedAt: new Date().toISOString(),
         score: null,
-        feedback: ""
+        feedback: "",
       }
 
-      const updatedSubmissions = existingSubmission
-        ? projectSubmissions.map(s =>
-            s.projectId === project.id &&
-            s.studentId === currentUser.id
-              ? newSubmission
-              : s
-          )
-        : [...projectSubmissions, newSubmission]
-
-      localStorage.setItem(
-        "projectSubmissions",
-        JSON.stringify(updatedSubmissions)
-      )
-
+      await saveProjectSubmissionFn(newSubmission)
       setIsSubmitted(true)
       navigate('/student/tasks')
     }
@@ -107,7 +106,6 @@ export default function StudentProjectDetail() {
       <h1 className="spd-title">{project.title}</h1>
 
       <div className="spd-card">
-
         <div className="spd-row">
           <FileText size={18} />
           <p>{project.requirements}</p>
@@ -134,15 +132,12 @@ export default function StudentProjectDetail() {
               Kechikkan
             </span>
           ) : (
-            <span className="spd-pending">
-              Kutilmoqda
-            </span>
+            <span className="spd-pending">Kutilmoqda</span>
           )}
         </div>
 
         {!isSubmitted && (
           <div className="spd-upload">
-
             <label className="spd-file-label">
               <File size={16} />
               Fayl tanlash (PDF/DOC)
@@ -154,16 +149,13 @@ export default function StudentProjectDetail() {
             </label>
 
             {selectedFile && (
-              <div className="spd-file-info">
-                {selectedFile.name}
-              </div>
+              <div className="spd-file-info">{selectedFile.name}</div>
             )}
 
             <button onClick={handleSubmit}>
               <Upload size={16} />
               Topshirish
             </button>
-
           </div>
         )}
       </div>

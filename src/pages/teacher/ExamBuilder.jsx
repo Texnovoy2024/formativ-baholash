@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
 	PlusCircle,
 	Trash2,
@@ -19,6 +19,7 @@ import './ExamBuilder.css'
 import * as pdfjsLib from 'pdfjs-dist'
 import pdfWorker from 'pdfjs-dist/build/pdf.worker?url'
 import mammoth from 'mammoth'
+import { getTasksFn, saveTasksFn, saveExamFn } from '../../context/authUtils'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
@@ -27,27 +28,42 @@ export default function ExamBuilder() {
 	const navigate = useNavigate()
 
 	const currentUser = JSON.parse(localStorage.getItem('currentUser'))
-	const tasksKey = `tasks_${currentUser?.id}`
-	const tasks = (() => {
-		try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
-	})()
 
-	const taskIndex = tasks.findIndex(t => Number(t.id) === Number(taskId))
+	const [tasks, setTasks] = useState([])
+	const [task, setTask] = useState(null)
+	const [taskIndex, setTaskIndex] = useState(-1)
+	const [loading, setLoading] = useState(true)
 
-	if (taskIndex === -1) return <h2>Topshiriq topilmadi</h2>
+	/* ================= LOAD FROM FIREBASE ================= */
 
-	const task = tasks[taskIndex]
+	useEffect(() => {
+		const load = async () => {
+			const t = await getTasksFn(currentUser?.id)
+			setTasks(t)
+			const idx = t.findIndex(x => String(x.id) === String(taskId))
+			setTaskIndex(idx)
+			if (idx !== -1) {
+				const found = t[idx]
+				setTask(found)
+				setExamTitle(found.examTitle || '')
+				setTimeLimit(found.timeLimit || '')
+				setMaxTotalPoints(found.maxTotalPoints || '')
+				setIsPublished(found.isPublished || false)
+				setQuestions(found.questions || [])
+			}
+			setLoading(false)
+		}
+		load()
+	}, [taskId])
 
 	/* ================= STATE ================= */
 
-	const [examTitle, setExamTitle] = useState(task.examTitle || '')
-	const [timeLimit, setTimeLimit] = useState(task.timeLimit || '')
-	const [maxTotalPoints, setMaxTotalPoints] = useState(
-		task.maxTotalPoints || '',
-	)
-	const [isPublished, setIsPublished] = useState(task.isPublished || false)
+	const [examTitle, setExamTitle] = useState('')
+	const [timeLimit, setTimeLimit] = useState('')
+	const [maxTotalPoints, setMaxTotalPoints] = useState('')
+	const [isPublished, setIsPublished] = useState(false)
 
-	const [questions, setQuestions] = useState(task.questions || [])
+	const [questions, setQuestions] = useState([])
 
 	const [questionText, setQuestionText] = useState('')
 	const [options, setOptions] = useState(['', '', '', ''])
@@ -88,12 +104,11 @@ export default function ExamBuilder() {
 
 	/* ================= STORAGE ================= */
 
-	const saveToStorage = updatedQuestions => {
+	const saveToStorage = async (updatedQuestions) => {
 		setIsSaving(true)
 		setIsSaved(false)
 
 		const updatedTasks = [...tasks]
-
 		updatedTasks[taskIndex] = {
 			...task,
 			examTitle,
@@ -103,7 +118,8 @@ export default function ExamBuilder() {
 			isPublished,
 		}
 
-		localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
+		await saveTasksFn(currentUser?.id, updatedTasks)
+		setTasks(updatedTasks)
 
 		setTimeout(() => {
 			setIsSaving(false)
@@ -326,6 +342,9 @@ export default function ExamBuilder() {
 
 	/* ================= UI ================= */
 
+	if (loading) return <h2>Yuklanmoqda...</h2>
+	if (taskIndex === -1) return <h2>Topshiriq topilmadi</h2>
+
 	return (
 		<div className='exam-container'>
 			{/* SETTINGS */}
@@ -471,15 +490,13 @@ export default function ExamBuilder() {
 			{/* PUBLISH BUTTON */}
 			<button
 				className={`publish-btn ${isPublished ? 'published' : ''}`}
-				onClick={() => {
+				onClick={async () => {
   if (!validateSettings()) return
 
   if (questions.length === 0) {
     setNoQuestionModal(true)
     return
   }
-
-  const allExams = JSON.parse(localStorage.getItem("allExams")) || []
 
   const examData = {
     id: task.id,
@@ -492,18 +509,10 @@ export default function ExamBuilder() {
     isPublished: true,
   }
 
-  const existingIndex = allExams.findIndex(e => e.id === task.id)
-
-  if (existingIndex !== -1) {
-    allExams[existingIndex] = examData
-  } else {
-    allExams.push(examData)
-  }
-
-  localStorage.setItem("allExams", JSON.stringify(allExams))
+  await saveExamFn(examData)
 
   setIsPublished(true)
-  saveToStorage(questions)
+  await saveToStorage(questions)
   navigate('/teacher/tasks')
 }}
 			>

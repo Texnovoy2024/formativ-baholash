@@ -2,44 +2,56 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Clock, FileText, CheckCircle, FolderKanban } from "lucide-react"
 import "./StudentTasksPage.css"
+import {
+  getAllExamsFn,
+  getAllProjectsFn,
+  getExamResultsFn,
+  getProjectSubmissionsFn,
+} from "../../context/authUtils"
 
 export default function StudentTasksPage() {
   const [exams, setExams] = useState([])
   const [projects, setProjects] = useState([])
+  const [results, setResults] = useState([])
+  const [projectSubmissions, setProjectSubmissions] = useState([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  const currentUser =
-    JSON.parse(localStorage.getItem("currentUser")) || {}
+  const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {}
 
   useEffect(() => {
-    const allExams = JSON.parse(localStorage.getItem("allExams")) || []
-    const allProjects = JSON.parse(localStorage.getItem("allProjects")) || []
+    const load = async () => {
+      const [allExams, allProjects, allResults, allSubs] = await Promise.all([
+        getAllExamsFn(),
+        getAllProjectsFn(),
+        getExamResultsFn(),
+        getProjectSubmissionsFn(),
+      ])
 
-    const studentClassId = currentUser?.classId
+      const studentClassId = currentUser?.classId
 
-    // Agar studentda classId bo'lsa — faqat o'sha sinfning topshiriqlari
-    // Agar classId yo'q bo'lsa — barcha publish qilingan topshiriqlar
-    const examFilter = e => {
-      if (!e.isPublished) return false
-      if (!studentClassId) return true
-      return !e.classId || String(e.classId) === String(studentClassId)
+      const examFilter = e => {
+        if (!e.isPublished) return false
+        if (!studentClassId) return true
+        return !e.classId || String(e.classId) === String(studentClassId)
+      }
+
+      const projectFilter = p => {
+        if (!p.isPublished) return false
+        if (!studentClassId) return true
+        return !p.classId || String(p.classId) === String(studentClassId)
+      }
+
+      setExams(allExams.filter(examFilter))
+      setProjects(allProjects.filter(projectFilter))
+      setResults(allResults)
+      setProjectSubmissions(allSubs)
+      setLoading(false)
     }
-
-    const projectFilter = p => {
-      if (!p.isPublished) return false
-      if (!studentClassId) return true
-      return !p.classId || String(p.classId) === String(studentClassId)
-    }
-
-    setExams(allExams.filter(examFilter))
-    setProjects(allProjects.filter(projectFilter))
+    load()
   }, [])
 
-  const results =
-    JSON.parse(localStorage.getItem("examResults")) || []
-
-  const projectSubmissions =
-    JSON.parse(localStorage.getItem("projectSubmissions")) || []
+  if (loading) return <div className="st-page"><p>Yuklanmoqda...</p></div>
 
   if (exams.length === 0 && projects.length === 0) {
     return (
@@ -54,20 +66,16 @@ export default function StudentTasksPage() {
       <h1 className="st-title">Topshiriqlar</h1>
 
       <div className="st-grid">
-
         {/* ================= EXAMS ================= */}
         {exams.map(exam => {
           const isDone = results.some(
-            r =>
-              r.examId === exam.id &&
-              r.studentId === currentUser.id
+            r => r.examId === exam.id && r.studentId === currentUser.id
           )
 
           return (
             <div key={exam.id} className="st-card">
               <div className="st-card-header">
                 <h3>{exam.examTitle}</h3>
-
                 {isDone && (
                   <span className="st-badge">
                     <CheckCircle size={14} /> Topshirilgan
@@ -80,7 +88,6 @@ export default function StudentTasksPage() {
                   <Clock size={16} />
                   {exam.timeLimit} daqiqa
                 </p>
-
                 <p>
                   <FileText size={16} />
                   {exam.questions?.length || 0} savol
@@ -90,9 +97,7 @@ export default function StudentTasksPage() {
               <button
                 className={`st-btn ${isDone ? "st-done" : "st-start"}`}
                 disabled={isDone}
-                onClick={() =>
-                  navigate(`/student/exam/${exam.id}`)
-                }
+                onClick={() => navigate(`/student/exam/${exam.id}`)}
               >
                 {isDone ? "Yakunlangan" : "Boshlash"}
               </button>
@@ -104,15 +109,14 @@ export default function StudentTasksPage() {
         {projects.map(project => {
           const isSubmitted = projectSubmissions.some(
             s =>
-              s.projectId === project.id &&
-              s.studentId === currentUser.id
+              String(s.projectId) === String(project.id) &&
+              String(s.studentId) === String(currentUser.id)
           )
 
           return (
             <div key={project.id} className="st-card">
               <div className="st-card-header">
                 <h3>{project.title}</h3>
-
                 {isSubmitted && (
                   <span className="st-badge">
                     <CheckCircle size={14} /> Topshirilgan
@@ -125,7 +129,6 @@ export default function StudentTasksPage() {
                   <Clock size={16} />
                   Muddati: {project.deadline}
                 </p>
-
                 <p>
                   <FileText size={16} />
                   Ball: {project.maxScore}
@@ -133,12 +136,8 @@ export default function StudentTasksPage() {
               </div>
 
               <button
-                className={`st-btn ${
-                  isSubmitted ? "st-done" : "st-start"
-                }`}
-                onClick={() =>
-                  navigate(`/student/projects/${project.id}`)
-                }
+                className={`st-btn ${isSubmitted ? "st-done" : "st-start"}`}
+                onClick={() => navigate(`/student/projects/${project.id}`)}
               >
                 {isSubmitted ? "Ko'rish" : "Boshlash"}
               </button>

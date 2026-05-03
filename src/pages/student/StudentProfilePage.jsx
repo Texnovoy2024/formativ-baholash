@@ -1,9 +1,17 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import {
   User, Mail, Lock, Eye, EyeOff,
   CheckCircle, BookOpen, Trophy, TrendingUp, Shield
 } from 'lucide-react'
 import './StudentProfilePage.css'
+import {
+  getExamResultsFn,
+  getProjectSubmissionsFn,
+  getStoredUsers,
+  getAllClassesFn,
+} from '../../context/authUtils'
+import { db } from '../../firebase'
+import { ref, update } from 'firebase/database'
 
 export default function StudentProfilePage() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {}
@@ -17,51 +25,50 @@ export default function StudentProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [pwMsg, setPwMsg] = useState(null)
 
-  // Sinf nomi
-  const className = useMemo(() => {
-    if (!currentUser.classId) return null
-    try {
-      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
-      const found = adminClasses.find(c => String(c.id) === String(currentUser.classId))
-      if (found) return found.name
-      // Teacher sinflaridan ham qidirish
-      const users = JSON.parse(localStorage.getItem('users')) || []
-      for (const u of users.filter(u => u.role === 'teacher')) {
-        const tc = JSON.parse(localStorage.getItem(`classes_${u.id}`)) || []
-        const fc = tc.find(c => String(c.id) === String(currentUser.classId))
-        if (fc) return fc.name
+  const [className, setClassName] = useState(null)
+  const [stats, setStats] = useState({
+    examCount: 0,
+    projectCount: 0,
+    avgScore: '—',
+    passCount: 0,
+  })
+
+  useEffect(() => {
+    const load = async () => {
+      const [examResults, projectSubs, classes] = await Promise.all([
+        getExamResultsFn(),
+        getProjectSubmissionsFn(),
+        getAllClassesFn(),
+      ])
+
+      if (currentUser.classId) {
+        const found = classes.find(c => String(c.id) === String(currentUser.classId))
+        setClassName(found?.name || null)
       }
-    } catch { /* skip */ }
-    return null
-  }, [currentUser.classId])
 
-  // Statistika
-  const stats = useMemo(() => {
-    const examResults = JSON.parse(localStorage.getItem('examResults')) || []
-    const projectSubs = JSON.parse(localStorage.getItem('projectSubmissions')) || []
+      const myExams = examResults.filter(r => String(r.studentId) === String(currentUser.id))
+      const myProjects = projectSubs.filter(s => String(s.studentId) === String(currentUser.id))
 
-    const myExams = examResults.filter(r => String(r.studentId) === String(currentUser.id))
-    const myProjects = projectSubs.filter(s => String(s.studentId) === String(currentUser.id))
+      const avgScore = myExams.length > 0
+        ? (myExams.reduce((a, b) => a + b.score, 0) / myExams.length).toFixed(1)
+        : '—'
+      const passCount = myExams.filter(r => r.total > 0 && r.score / r.total >= 0.6).length
 
-    const avgScore = myExams.length > 0
-      ? (myExams.reduce((a, b) => a + b.score, 0) / myExams.length).toFixed(1)
-      : '—'
-
-    const passCount = myExams.filter(r => r.total > 0 && r.score / r.total >= 0.6).length
-
-    return {
-      examCount: myExams.length,
-      projectCount: myProjects.length,
-      avgScore,
-      passCount,
+      setStats({
+        examCount: myExams.length,
+        projectCount: myProjects.length,
+        avgScore,
+        passCount,
+      })
     }
-  }, [currentUser.id])
+    load()
+  }, [])
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault()
     setPwMsg(null)
 
-    const users = JSON.parse(localStorage.getItem('users')) || []
+    const users = await getStoredUsers()
     const user = users.find(u => String(u.id) === String(currentUser.id))
 
     if (!user || user.password !== oldPassword) {
@@ -79,10 +86,7 @@ export default function StudentProfilePage() {
       return
     }
 
-    const updatedUsers = users.map(u =>
-      String(u.id) === String(currentUser.id) ? { ...u, password: newPassword } : u
-    )
-    localStorage.setItem('users', JSON.stringify(updatedUsers))
+    await update(ref(db, `users/${currentUser.id}`), { password: newPassword })
     localStorage.setItem('currentUser', JSON.stringify({ ...currentUser, password: newPassword }))
 
     setPwMsg({ type: 'success', text: "Parol muvaffaqiyatli o'zgartirildi" })
@@ -100,8 +104,6 @@ export default function StudentProfilePage() {
       <h1 className="spp-title">Mening profilim</h1>
 
       <div className="spp-grid">
-
-        {/* ── PROFIL KARTASI ── */}
         <div className="spp-card">
           <div className="spp-avatar-wrap">
             <div className="spp-avatar">{initials}</div>
@@ -148,7 +150,6 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
-        {/* ── STATISTIKA ── */}
         <div className="spp-card">
           <h3 className="spp-section-title">Mening natijalarim</h3>
           <div className="spp-stats-grid">
@@ -183,7 +184,6 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
-        {/* ── PAROL O'ZGARTIRISH ── */}
         <div className="spp-card spp-full">
           <h3 className="spp-section-title">
             <Lock size={18} /> Parolni o'zgartirish
@@ -250,7 +250,6 @@ export default function StudentProfilePage() {
             </button>
           </form>
         </div>
-
       </div>
     </div>
   )

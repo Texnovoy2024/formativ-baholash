@@ -2,25 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { FiSearch, FiUsers, FiTrash2, FiUser, FiUserCheck } from 'react-icons/fi'
 import './AllUsersPage.css'
-
-// Barcha sinflarni yig'ish yordamchi funksiya
-function loadAllClasses() {
-  const result = []
-  try {
-    const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
-    adminClasses.forEach(c => result.push(c))
-  } catch { /* skip */ }
-  try {
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || []
-    storedUsers.filter(u => u.role === 'teacher').forEach(t => {
-      const tc = JSON.parse(localStorage.getItem(`classes_${t.id}`)) || []
-      tc.forEach(c => {
-        if (!result.find(r => String(r.id) === String(c.id))) result.push(c)
-      })
-    })
-  } catch { /* skip */ }
-  return result
-}
+import { getAllClassesFn } from '../../context/authUtils'
 
 export default function AllUsersPage() {
   const { getUsers, deleteUser } = useAuth()
@@ -30,21 +12,32 @@ export default function AllUsersPage() {
   const [filter, setFilter] = useState('all')
   const [classFilter, setClassFilter] = useState('all')
   const [confirmId, setConfirmId] = useState(null)
-  const [allClasses] = useState(() => loadAllClasses())
+  const [allClasses, setAllClasses] = useState([])
 
   useEffect(() => {
-    setUsers(getUsers())
+    const load = async () => {
+      const [list, classes] = await Promise.all([
+        getUsers(),
+        getAllClassesFn(),
+      ])
+      setUsers(list)
+      setAllClasses(classes)
+    }
+    load()
   }, [])
 
-  const loadUsers = () => setUsers(getUsers())
+  const loadUsers = async () => {
+    const list = await getUsers()
+    setUsers(list)
+  }
 
   const getClassName = (classId) => {
     if (!classId) return null
     return allClasses.find(c => String(c.id) === String(classId))?.name || null
   }
 
-  const handleDelete = () => {
-    deleteUser(confirmId)
+  const handleDelete = async () => {
+    await deleteUser(confirmId)
     loadUsers()
     setConfirmId(null)
   }

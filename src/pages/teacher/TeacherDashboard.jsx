@@ -1,66 +1,55 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import { BookOpen, Users, ClipboardList } from "lucide-react";
 import {
-  BookOpen,
-  Users,
-  ClipboardList
-} from "lucide-react";
+  getTeacherClassesFn,
+  getAdminClassesFn,
+  getTasksFn,
+  getStoredUsers,
+} from "../../context/authUtils";
 import "./TeacherDashboard.css";
 
 export default function TeacherDashboard() {
-
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const [classes, setClasses] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
 
-  // Teacher o'z sinflari + admin yaratgan sinflar
-  const classes = (() => {
-    const result = []
-    try {
-      const tc = JSON.parse(localStorage.getItem(`classes_${currentUser?.id}`)) || []
-      tc.forEach(c => result.push(c))
-    } catch { /* skip */ }
-    try {
-      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
-      adminClasses.forEach(c => {
-        if (!result.find(r => String(r.id) === String(c.id))) result.push(c)
-      })
-    } catch { /* skip */ }
-    return result
-  })();
-  const tasks = (() => {
-    try { return JSON.parse(localStorage.getItem(`tasks_${currentUser?.id}`)) || [] } catch { return [] }
-  })();
+  useEffect(() => {
+    const load = async () => {
+      // Teacher sinflar
+      const teacherClasses = await getTeacherClassesFn(currentUser?.id);
+      // Admin sinflar
+      const adminClasses = await getAdminClassesFn();
+      const merged = [...teacherClasses];
+      adminClasses.forEach((c) => {
+        if (!merged.find((r) => String(r.id) === String(c.id))) merged.push(c);
+      });
+      setClasses(merged);
 
-  /* ================= STATS ================= */
+      // Topshiriqlar
+      const t = await getTasksFn(currentUser?.id);
+      setTasks(t);
 
-  const totalStudents = useMemo(() => {
-    // Teacher sinflaridagi o'quvchilar (students massivi orqali)
-    const fromClasses = classes.reduce(
-      (acc, cls) => acc + (cls.students?.length || 0), 0
-    )
-    // Admin sinflariga biriktirilgan o'quvchilar (users.classId orqali)
-    const adminClassIds = (() => {
-      try {
-        return (JSON.parse(localStorage.getItem('admin_classes')) || []).map(c => String(c.id))
-      } catch { return [] }
-    })()
-    const fromAdminClasses = (() => {
-      try {
-        const users = JSON.parse(localStorage.getItem('users')) || []
-        return users.filter(u => u.role === 'student' && adminClassIds.includes(String(u.classId))).length
-      } catch { return 0 }
-    })()
-    return fromClasses + fromAdminClasses
-  }, [classes]);
-
-  const totalTasks = tasks.length || 0;
+      // O'quvchilar soni
+      const fromClasses = merged.reduce(
+        (acc, cls) => acc + (cls.students?.length || 0),
+        0
+      );
+      const adminClassIds = adminClasses.map((c) => String(c.id));
+      const allUsers = await getStoredUsers();
+      const fromAdminClasses = allUsers.filter(
+        (u) => u.role === "student" && adminClassIds.includes(String(u.classId))
+      ).length;
+      setTotalStudents(fromClasses + fromAdminClasses);
+    };
+    load();
+  }, []);
 
   return (
     <div className="dashboard-container">
-
       <h1 className="dashboard-title">Boshqaruv paneli</h1>
 
       <div className="dashboard-grid">
-
-        {/* CLASSES */}
         <div className="dashboard-card">
           <div className="card-icon blue">
             <BookOpen size={22} />
@@ -71,30 +60,26 @@ export default function TeacherDashboard() {
           </div>
         </div>
 
-        {/* STUDENTS */}
         <div className="dashboard-card">
           <div className="card-icon green">
             <Users size={22} />
           </div>
           <div>
-            <p className="card-label">O‘quvchilar</p>
+            <p className="card-label">O'quvchilar</p>
             <h2>{totalStudents}</h2>
           </div>
         </div>
 
-        {/* TASKS */}
         <div className="dashboard-card">
           <div className="card-icon purple">
             <ClipboardList size={22} />
           </div>
           <div>
             <p className="card-label">Topshiriqlar</p>
-            <h2>{totalTasks}</h2>
+            <h2>{tasks.length}</h2>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import './AdminPanel.css'
 import { FiEye, FiEyeOff, FiUser, FiUsers, FiTrash2, FiCheckCircle } from 'react-icons/fi'
+import { getAdminClassesFn, addAdminClassFn, getAllClassesFn } from '../../context/authUtils'
 
 const AdminPanel = () => {
   const { addUser, deleteUser, getUsers } = useAuth()
@@ -24,32 +25,24 @@ const AdminPanel = () => {
   const [newClassName, setNewClassName] = useState('')
   const [availableClasses, setAvailableClasses] = useState([])
 
-  // Barcha teacherlarning sinflarini yig'ish
-  const loadAllClasses = () => {
-    const classes = []
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || []
-    const teachers = storedUsers.filter(u => u.role === 'teacher')
-    teachers.forEach(t => {
-      try {
-        const tc = JSON.parse(localStorage.getItem(`classes_${t.id}`)) || []
-        tc.forEach(c => classes.push({ ...c, teacherName: t.name }))
-      } catch { /* skip */ }
-    })
-    // Admin tomonidan yaratilgan sinflar
-    try {
-      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
-      adminClasses.forEach(c => classes.push({ ...c, teacherName: 'Admin' }))
-    } catch { /* skip */ }
-    return classes
+  // Barcha sinflarni yig'ish
+  const loadAllClasses = async () => {
+    return await getAllClassesFn()
   }
 
   useEffect(() => {
     loadUsers()
-    setAvailableClasses(loadAllClasses())
+    loadClasses()
   }, [])
 
-  const loadUsers = () => {
-    setUsers(getUsers())
+  const loadUsers = async () => {
+    const list = await getUsers()
+    setUsers(list)
+  }
+
+  const loadClasses = async () => {
+    const classes = await loadAllClasses()
+    setAvailableClasses(classes)
   }
 
   const handleChange = (e) => {
@@ -57,7 +50,7 @@ const AdminPanel = () => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMessage('')
 
@@ -68,16 +61,15 @@ const AdminPanel = () => {
         setErrorMessage("Sinf nomini kiriting")
         return
       }
-      const newClass = { id: Date.now(), name: newClassName.trim(), teacherName: 'Admin' }
-      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
-      adminClasses.push(newClass)
-      localStorage.setItem('admin_classes', JSON.stringify(adminClasses))
+      const newClass = { id: Date.now().toString(), name: newClassName.trim(), teacherName: 'Admin' }
+      await addAdminClassFn(newClass)
       resolvedClassId = newClass.id
-      setAvailableClasses(loadAllClasses())
+      const updatedClasses = await loadAllClasses()
+      setAvailableClasses(updatedClasses)
       setNewClassName('')
     }
 
-    const result = addUser({
+    const result = await addUser({
       name: form.name,
       email: form.email,
       password: form.password,
@@ -100,8 +92,8 @@ const AdminPanel = () => {
     setConfirmModal(true)
   }
 
-  const confirmDelete = () => {
-    deleteUser(selectedUserId)
+  const confirmDelete = async () => {
+    await deleteUser(selectedUserId)
     loadUsers()
     setConfirmModal(false)
     setSelectedUserId(null)

@@ -1,25 +1,37 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Clock, FileText, CheckCircle, FolderKanban } from "lucide-react"
+import { getAllProjectsFn, getProjectSubmissionsFn } from "../../context/authUtils"
 
 export default function StudentProjectPage() {
   const [projects, setProjects] = useState([])
+  const [projectSubmissions, setProjectSubmissions] = useState([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {}
 
   useEffect(() => {
-    const allProjects = JSON.parse(localStorage.getItem("allProjects")) || []
-    const studentClassId = currentUser?.classId
+    const load = async () => {
+      const [allProjects, allSubs] = await Promise.all([
+        getAllProjectsFn(),
+        getProjectSubmissionsFn(),
+      ])
 
-    const filtered = allProjects.filter(p => {
-      if (!p.isPublished) return false
-      if (!studentClassId) return true
-      return !p.classId || String(p.classId) === String(studentClassId)
-    })
-    setProjects(filtered)
+      const studentClassId = currentUser?.classId
+      const filtered = allProjects.filter(p => {
+        if (!p.isPublished) return false
+        if (!studentClassId) return true
+        return !p.classId || String(p.classId) === String(studentClassId)
+      })
+
+      setProjects(filtered)
+      setProjectSubmissions(allSubs)
+      setLoading(false)
+    }
+    load()
   }, [])
 
-  const projectSubmissions = JSON.parse(localStorage.getItem("projectSubmissions")) || []
+  if (loading) return <div style={{ padding: 40 }}><p>Yuklanmoqda...</p></div>
 
   if (projects.length === 0) {
     return (
@@ -36,10 +48,15 @@ export default function StudentProjectPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
         {projects.map(project => {
           const isSubmitted = projectSubmissions.some(
-            s => s.projectId === project.id && String(s.studentId) === String(currentUser.id)
+            s =>
+              String(s.projectId) === String(project.id) &&
+              String(s.studentId) === String(currentUser.id)
           )
           return (
-            <div key={project.id} style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
+            <div
+              key={project.id}
+              style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}
+            >
               <h3 style={{ fontWeight: 600, marginBottom: 12 }}>{project.title}</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 14, color: "#6b7280", marginBottom: 16 }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 6 }}>

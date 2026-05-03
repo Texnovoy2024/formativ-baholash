@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Clock, CheckCircle, AlertTriangle, Send } from "lucide-react"
 import "./StudentExamPage.css"
+import { getAllExamsFn, addExamResultFn } from "../../context/authUtils"
 
 export default function StudentExamPage() {
   const { examId } = useParams()
@@ -18,24 +19,21 @@ export default function StudentExamPage() {
 
   /* ================= LOAD EXAM ================= */
   useEffect(() => {
-  const allExams = JSON.parse(localStorage.getItem("allExams")) || []
-  const found = allExams.find(e => String(e.id) === String(examId))
+    const load = async () => {
+      const allExams = await getAllExamsFn()
+      const found = allExams.find(e => String(e.id) === String(examId))
 
-  if (!found) return navigate("/student/tasks")
+      if (!found) return navigate("/student/tasks")
 
-  const limit = Number(found.timeLimit)
+      const limit = Number(found.timeLimit)
+      if (!limit || limit <= 0) return
 
-  if (!limit || limit <= 0) {
-    console.error("timeLimit noto‘g‘ri:", found.timeLimit)
-    return
-  }
-
-  setExam(found)
-
-  const deadline = Date.now() + limit * 60 * 1000
-  setEndTime(deadline)
-
-}, [examId])
+      setExam(found)
+      const deadline = Date.now() + limit * 60 * 1000
+      setEndTime(deadline)
+    }
+    load()
+  }, [examId])
 
   /* ================= REAL TIMER ================= */
   useEffect(() => {
@@ -43,7 +41,6 @@ export default function StudentExamPage() {
 
     const interval = setInterval(() => {
       const remaining = Math.floor((endTime - Date.now()) / 1000)
-
       if (remaining <= 0) {
         clearInterval(interval)
         autoSubmit()
@@ -55,31 +52,24 @@ export default function StudentExamPage() {
     return () => clearInterval(interval)
   }, [endTime, isFinished])
 
-  /* ================= ANSWERS ================= */
   const handleSelect = (questionId, optionIndex) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: optionIndex
-    }))
+    setAnswers(prev => ({ ...prev, [questionId]: optionIndex }))
   }
 
   /* ================= SAVE RESULT ================= */
-  const saveResult = () => {
+  const saveResult = async () => {
     let score = 0
-
     exam.questions.forEach(q => {
       if (answers[q.id] === q.correctIndex) {
         score += q.points
       }
     })
 
-    const results = JSON.parse(localStorage.getItem("examResults")) || []
-
-    results.push({
+    const result = {
       examId: exam.id,
       examTitle: exam.examTitle,
       studentId: currentUser.id,
-      studentName: currentUser.name || currentUser.fullName || 'Noma\'lum',
+      studentName: currentUser.name || currentUser.fullName || "Noma'lum",
       score,
       total: exam.questions.reduce((sum, q) => sum + q.points, 0),
       date: new Date().toISOString(),
@@ -89,22 +79,22 @@ export default function StudentExamPage() {
         correct: answers[q.id] === q.correctIndex,
         chosen: answers[q.id],
         correctIndex: q.correctIndex,
-      }))
-    })
+      })),
+    }
 
-    localStorage.setItem("examResults", JSON.stringify(results))
+    await addExamResultFn(result)
   }
 
-  const autoSubmit = () => {
+  const autoSubmit = async () => {
     if (isFinished) return
     setIsFinished(true)
-    saveResult()
+    await saveResult()
     navigate("/student/results")
   }
 
-  const confirmFinish = () => {
+  const confirmFinish = async () => {
     setIsFinished(true)
-    saveResult()
+    await saveResult()
     navigate("/student/results")
   }
 
@@ -112,20 +102,14 @@ export default function StudentExamPage() {
 
   const minutes = Math.floor(timeLeft / 60)
   const seconds = timeLeft % 60
-
   const answeredCount = Object.keys(answers).length
-  const progressPercent =
-    (answeredCount / exam.questions.length) * 100
+  const progressPercent = (answeredCount / exam.questions.length) * 100
 
   return (
     <div className="se-page">
-
-      {/* ===== STICKY TOP AREA ===== */}
       <div className="se-sticky">
-
         <div className="se-header">
           <h2>{exam.examTitle}</h2>
-
           <div className={`se-timer ${timeLeft < 60 ? "danger" : ""}`}>
             <Clock size={16} />
             {minutes}:{seconds.toString().padStart(2, "0")}
@@ -134,12 +118,9 @@ export default function StudentExamPage() {
 
         <div className="se-progress">
           <div className="se-progress-info">
-            <span>
-              Javob berildi: {answeredCount} / {exam.questions.length}
-            </span>
+            <span>Javob berildi: {answeredCount} / {exam.questions.length}</span>
             <span>{progressPercent.toFixed(0)}%</span>
           </div>
-
           <div className="se-progress-bar">
             <div
               className="se-progress-fill"
@@ -147,14 +128,11 @@ export default function StudentExamPage() {
             />
           </div>
         </div>
-
       </div>
 
-      {/* ===== QUESTIONS ===== */}
       {exam.questions.map((q, index) => (
         <div key={q.id} className="se-question-card">
           <h4>{index + 1}. {q.text}</h4>
-
           {q.options.map((opt, idx) => (
             <label key={idx} className="se-option">
               <input
@@ -174,19 +152,14 @@ export default function StudentExamPage() {
         Yakunlash
       </button>
 
-      {/* ===== MODAL ===== */}
       {showModal && (
         <div className="se-modal-overlay">
           <div className="se-modal">
             <AlertTriangle size={32} color="#f59e0b" />
             <h3>Imtihonni yakunlamoqchimisiz?</h3>
             <p>{answeredCount} ta savolga javob berdingiz.</p>
-
             <div className="se-modal-buttons">
-              <button onClick={() => setShowModal(false)}>
-                Bekor qilish
-              </button>
-
+              <button onClick={() => setShowModal(false)}>Bekor qilish</button>
               <button className="confirm-btn" onClick={confirmFinish}>
                 <CheckCircle size={16} />
                 Ha, yakunlash

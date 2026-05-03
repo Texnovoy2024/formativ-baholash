@@ -1,39 +1,22 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Pencil, Trash2, Save, X, Search, CalendarDays } from "lucide-react"
 import ConfirmModal from "../../components/ui/ConfirmModal"
 import "./TeacherTasksPage.css"
 import { useNavigate } from "react-router-dom"
+import {
+  getTasksFn,
+  saveTasksFn,
+  getAllClassesFn,
+} from "../../context/authUtils"
 
 export default function TeacherTasksPage() {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
-  const tasksKey = `tasks_${currentUser?.id}`
-
-  const initialTasks = (() => {
-    try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
-  })()
-
-  // Admin yaratgan sinflar + teacher sinflarini birlashtirish
-  const classes = (() => {
-    const result = []
-    try {
-      const adminClasses = JSON.parse(localStorage.getItem('admin_classes')) || []
-      adminClasses.forEach(c => result.push(c))
-    } catch { /* skip */ }
-    try {
-      const storedUsers = JSON.parse(localStorage.getItem('users')) || []
-      const teachers = storedUsers.filter(u => u.role === 'teacher')
-      teachers.forEach(t => {
-        const tc = JSON.parse(localStorage.getItem(`classes_${t.id}`)) || []
-        tc.forEach(c => {
-          if (!result.find(r => String(r.id) === String(c.id))) result.push(c)
-        })
-      })
-    } catch { /* skip */ }
-    return result
-  })()
   const navigate = useNavigate()
 
-  const [tasks, setTasks] = useState(initialTasks)
+  const [tasks, setTasks] = useState([])
+  const [classes, setClasses] = useState([])
+  const [loading, setLoading] = useState(true)
+
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [type, setType] = useState("homework")
@@ -48,67 +31,79 @@ export default function TeacherTasksPage() {
 
   const [deleteId, setDeleteId] = useState(null)
 
-  const updateStorage = updatedTasks => {
-    localStorage.setItem(tasksKey, JSON.stringify(updatedTasks))
+  useEffect(() => {
+    const load = async () => {
+      const [t, c] = await Promise.all([
+        getTasksFn(currentUser?.id),
+        getAllClassesFn(),
+      ])
+      setTasks(t)
+      setClasses(c)
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const updateStorage = async (updatedTasks) => {
+    await saveTasksFn(currentUser?.id, updatedTasks)
   }
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!title.trim() || !selectedClassId) return
 
     const newTask = {
-      id: Date.now(),
+      id: Date.now().toString(),
       title,
       description,
       type,
-      classId: Number(selectedClassId),
+      classId: selectedClassId,
       createdAt: new Date().toISOString(),
-      questions: []
+      questions: [],
     }
 
     const updated = [...tasks, newTask]
     setTasks(updated)
-    updateStorage(updated)
+    await updateStorage(updated)
 
     setTitle("")
     setDescription("")
   }
 
-  const startEdit = task => {
+  const startEdit = (task) => {
     setEditingId(task.id)
     setEditedTitle(task.title)
     setEditedDescription(task.description)
   }
 
-  const saveEdit = () => {
-    const updated = tasks.map(t =>
+  const saveEdit = async () => {
+    const updated = tasks.map((t) =>
       t.id === editingId
         ? { ...t, title: editedTitle, description: editedDescription }
         : t
     )
-
     setTasks(updated)
-    updateStorage(updated)
+    await updateStorage(updated)
     setEditingId(null)
   }
 
-  const confirmDelete = () => {
-    const updated = tasks.filter(t => t.id !== deleteId)
+  const confirmDelete = async () => {
+    const updated = tasks.filter((t) => t.id !== deleteId)
     setTasks(updated)
-    updateStorage(updated)
+    await updateStorage(updated)
     setDeleteId(null)
   }
 
   const filteredTasks = useMemo(() => {
-    let data = tasks.filter(t =>
+    let data = tasks.filter((t) =>
       t.title.toLowerCase().includes(search.toLowerCase())
     )
-
     data.sort((a, b) =>
       sortAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
     )
-
     return data
   }, [tasks, search, sortAsc])
+
+  if (loading) return <div className="teacher-tasks"><p>Yuklanmoqda...</p></div>
 
   return (
     <div className="teacher-tasks">
@@ -120,20 +115,20 @@ export default function TeacherTasksPage() {
           className="teacher-input"
           placeholder="Topshiriq nomi"
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
         />
 
         <textarea
           className="teacher-textarea"
           placeholder="Topshiriq tavsifi"
           value={description}
-          onChange={e => setDescription(e.target.value)}
+          onChange={(e) => setDescription(e.target.value)}
         />
 
         <select
           className="teacher-select"
           value={type}
-          onChange={e => setType(e.target.value)}
+          onChange={(e) => setType(e.target.value)}
         >
           <option value="homework">Vazifa</option>
           <option value="test">Test</option>
@@ -143,10 +138,10 @@ export default function TeacherTasksPage() {
         <select
           className="teacher-select"
           value={selectedClassId}
-          onChange={e => setSelectedClassId(e.target.value)}
+          onChange={(e) => setSelectedClassId(e.target.value)}
         >
           <option value="">Sinf tanlang</option>
-          {classes.map(cls => (
+          {classes.map((cls) => (
             <option key={cls.id} value={cls.id}>
               {cls.name}
             </option>
@@ -154,7 +149,7 @@ export default function TeacherTasksPage() {
         </select>
 
         <button className="teacher-btn-primary" onClick={handleAddTask}>
-          Qo‘shish
+          Qo'shish
         </button>
       </div>
 
@@ -165,7 +160,7 @@ export default function TeacherTasksPage() {
           <input
             placeholder="Qidirish..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
@@ -179,7 +174,7 @@ export default function TeacherTasksPage() {
 
       {/* TASK GRID */}
       <div className="teacher-tasks__grid">
-        {filteredTasks.map(task => (
+        {filteredTasks.map((task) => (
           <div key={task.id} className="teacher-task-card">
             {(task.type === "quiz" || task.type === "test") && (
               <button
@@ -193,27 +188,31 @@ export default function TeacherTasksPage() {
             {task.type === "project" && (
               <>
                 <button
-                  onClick={() =>
-                    navigate(`/teacher/project-builder/${task.id}`)
-                  }
+                  onClick={() => navigate(`/teacher/project-builder/${task.id}`)}
                   className="teacher-btn-secondary"
                 >
                   Loyihani sozlash
                 </button>
 
                 <button
-                  onClick={() =>
-                    navigate(`/teacher/project-submissions/${task.id}`)
-                  }
+                  onClick={() => navigate(`/teacher/project-submissions/${task.id}`)}
                   className="teacher-btn-secondary"
                 >
-                  Topshirishlarni ko‘rish
+                  Topshirishlarni ko'rish
                 </button>
               </>
             )}
 
             <span className={`teacher-badge teacher-badge--${task.type}`}>
-              {task.type === 'test' ? 'Test' : task.type === 'project' ? 'Loyiha' : task.type === 'homework' ? 'Vazifa' : task.type === 'quiz' ? 'Test' : task.type}
+              {task.type === "test"
+                ? "Test"
+                : task.type === "project"
+                ? "Loyiha"
+                : task.type === "homework"
+                ? "Vazifa"
+                : task.type === "quiz"
+                ? "Test"
+                : task.type}
             </span>
 
             {editingId === task.id ? (
@@ -221,12 +220,12 @@ export default function TeacherTasksPage() {
                 <input
                   className="teacher-input"
                   value={editedTitle}
-                  onChange={e => setEditedTitle(e.target.value)}
+                  onChange={(e) => setEditedTitle(e.target.value)}
                 />
                 <textarea
                   className="teacher-textarea"
                   value={editedDescription}
-                  onChange={e => setEditedDescription(e.target.value)}
+                  onChange={(e) => setEditedDescription(e.target.value)}
                 />
 
                 <div className="teacher-task-actions">
@@ -242,7 +241,7 @@ export default function TeacherTasksPage() {
               <>
                 <h3>{task.title}</h3>
                 <p className="teacher-task-desc">
-                  {task.description || "Tavsif yo‘q"}
+                  {task.description || "Tavsif yo'q"}
                 </p>
 
                 <div className="teacher-task-meta">
@@ -270,8 +269,8 @@ export default function TeacherTasksPage() {
 
       <ConfirmModal
         isOpen={deleteId !== null}
-        title="Topshiriqni o‘chirish"
-        message="Rostdan ham ushbu topshiriqni o‘chirmoqchimisiz?"
+        title="Topshiriqni o'chirish"
+        message="Rostdan ham ushbu topshiriqni o'chirmoqchimisiz?"
         onCancel={() => setDeleteId(null)}
         onConfirm={confirmDelete}
       />

@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   CheckCircle,
   Clock,
@@ -10,46 +10,52 @@ import {
   ArrowLeft
 } from "lucide-react"
 import "./ProjectSubmissionsPage.css"
+import {
+  getStoredUsers,
+  getProjectSubmissionsFn,
+  updateProjectSubmissionFn,
+} from "../../context/authUtils"
 
 export default function ProjectSubmissionsPage() {
   const { projectId } = useParams()
   const navigate = useNavigate()
 
-  const users = JSON.parse(localStorage.getItem("users")) || []
-  const submissions =
-    JSON.parse(localStorage.getItem("projectSubmissions")) || []
+  const [users, setUsers] = useState([])
+  const [localSubmissions, setLocalSubmissions] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const projectSubmissions = submissions.filter(
-    s => String(s.projectId) === String(projectId)
-  )
+  useEffect(() => {
+    const load = async () => {
+      const [u, subs] = await Promise.all([
+        getStoredUsers(),
+        getProjectSubmissionsFn(),
+      ])
+      setUsers(u)
+      setLocalSubmissions(
+        subs.filter(s => String(s.projectId) === String(projectId))
+      )
+      setLoading(false)
+    }
+    load()
+  }, [projectId])
 
-  const [localSubmissions, setLocalSubmissions] =
-    useState(projectSubmissions)
+  const handleGrade = async (studentId, score, feedback) => {
+    await updateProjectSubmissionFn(projectId, studentId, {
+      score: Number(score),
+      feedback,
+      gradedAt: new Date().toISOString(),
+    })
 
-  const handleGrade = (studentId, score, feedback) => {
-    const updated = submissions.map(s =>
-      String(s.projectId) === String(projectId) &&
-      String(s.studentId) === String(studentId)
-        ? {
-            ...s,
-            score: Number(score),
-            feedback,
-            gradedAt: new Date().toISOString(),
-          }
-        : s
-    )
-
-    localStorage.setItem(
-      "projectSubmissions",
-      JSON.stringify(updated)
-    )
-
-    setLocalSubmissions(
-      updated.filter(
-        s => String(s.projectId) === String(projectId)
+    setLocalSubmissions(prev =>
+      prev.map(s =>
+        String(s.studentId) === String(studentId)
+          ? { ...s, score: Number(score), feedback, gradedAt: new Date().toISOString() }
+          : s
       )
     )
   }
+
+  if (loading) return <div className="tp-empty"><p>Yuklanmoqda...</p></div>
 
   if (localSubmissions.length === 0) {
     return (
@@ -79,7 +85,6 @@ export default function ProjectSubmissionsPage() {
 
           return (
             <div key={sub.studentId} className="tp-card">
-
               <div className="tp-card-header">
                 <User size={18} />
                 <h3>{student?.name || "Student"}</h3>
@@ -90,14 +95,12 @@ export default function ProjectSubmissionsPage() {
                   <FileText size={14} />
                   {sub.fileName}
                 </p>
-
                 <p>
                   <Clock size={14} />
                   {new Date(sub.submittedAt).toLocaleDateString()}
                 </p>
               </div>
 
-              {/* 🔥 FILE PREVIEW */}
               {sub.fileType === "application/pdf" && (
                 <iframe
                   src={sub.fileData}
@@ -117,23 +120,19 @@ export default function ProjectSubmissionsPage() {
                 </a>
               )}
 
-              {sub.score !== null ? (
+              {sub.score !== null && sub.score !== undefined ? (
                 <div className="tp-graded">
                   <div className="tp-grade-badge">
                     <Award size={16} />
                     {sub.score} ball
                   </div>
-
                   <div className="tp-feedback">
                     <CheckCircle size={16} />
                     <span>{sub.feedback}</span>
                   </div>
                 </div>
               ) : (
-                <GradingForm
-                  submission={sub}
-                  onGrade={handleGrade}
-                />
+                <GradingForm submission={sub} onGrade={handleGrade} />
               )}
             </div>
           )
@@ -156,19 +155,15 @@ function GradingForm({ submission, onGrade }) {
         value={score}
         onChange={e => setScore(e.target.value)}
       />
-
       <textarea
         className="tp-textarea"
         placeholder="Fikr yozing..."
         value={feedback}
         onChange={e => setFeedback(e.target.value)}
       />
-
       <button
         className="tp-btn"
-        onClick={() =>
-          onGrade(submission.studentId, score, feedback)
-        }
+        onClick={() => onGrade(submission.studentId, score, feedback)}
       >
         Baholash
       </button>

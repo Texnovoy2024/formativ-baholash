@@ -1,9 +1,17 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import {
   User, Mail, Lock, Eye, EyeOff,
   CheckCircle, BookOpen, Users, BarChart3, Shield
 } from 'lucide-react'
 import './TeacherProfilePage.css'
+import {
+  getTasksFn,
+  getAllExamsFn,
+  getExamResultsFn,
+  getStoredUsers,
+} from '../../context/authUtils'
+import { db } from '../../firebase'
+import { ref, update } from 'firebase/database'
 
 export default function TeacherProfilePage() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {}
@@ -15,39 +23,45 @@ export default function TeacherProfilePage() {
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [pwMsg, setPwMsg] = useState(null) // { type: 'success'|'error', text }
+  const [pwMsg, setPwMsg] = useState(null)
 
-  // Statistika
-  const stats = useMemo(() => {
-    const tasksKey = `tasks_${currentUser.id}`
-    const tasks = (() => {
-      try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
-    })()
+  const [stats, setStats] = useState({
+    taskCount: 0,
+    studentCount: 0,
+    avgScore: '—',
+    examCount: 0,
+  })
 
-    const examResults = JSON.parse(localStorage.getItem('examResults')) || []
-    const allExams = JSON.parse(localStorage.getItem('allExams')) || []
-    const myExamIds = allExams.filter(e => e.teacherId === currentUser.id).map(e => e.id)
-    const myResults = examResults.filter(r => myExamIds.includes(r.examId))
+  useEffect(() => {
+    const load = async () => {
+      const [tasks, exams, results] = await Promise.all([
+        getTasksFn(currentUser.id),
+        getAllExamsFn(),
+        getExamResultsFn(),
+      ])
 
-    const uniqueStudents = new Set(myResults.map(r => r.studentId)).size
-    const avgScore = myResults.length > 0
-      ? (myResults.reduce((a, b) => a + b.score, 0) / myResults.length).toFixed(1)
-      : '—'
+      const myExamIds = exams.filter(e => e.teacherId === currentUser.id).map(e => e.id)
+      const myResults = results.filter(r => myExamIds.includes(r.examId))
+      const uniqueStudents = new Set(myResults.map(r => r.studentId)).size
+      const avgScore = myResults.length > 0
+        ? (myResults.reduce((a, b) => a + b.score, 0) / myResults.length).toFixed(1)
+        : '—'
 
-    return {
-      taskCount: tasks.length,
-      studentCount: uniqueStudents,
-      avgScore,
-      examCount: myExamIds.length,
+      setStats({
+        taskCount: tasks.length,
+        studentCount: uniqueStudents,
+        avgScore,
+        examCount: myExamIds.length,
+      })
     }
-  }, [currentUser.id])
+    load()
+  }, [])
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault()
     setPwMsg(null)
 
-    // Eski parolni tekshirish
-    const users = JSON.parse(localStorage.getItem('users')) || []
+    const users = await getStoredUsers()
     const user = users.find(u => String(u.id) === String(currentUser.id))
 
     if (!user || user.password !== oldPassword) {
@@ -65,15 +79,8 @@ export default function TeacherProfilePage() {
       return
     }
 
-    // Parolni yangilash
-    const updatedUsers = users.map(u =>
-      String(u.id) === String(currentUser.id) ? { ...u, password: newPassword } : u
-    )
-    localStorage.setItem('users', JSON.stringify(updatedUsers))
-
-    // currentUser ni ham yangilash
-    const updatedCurrent = { ...currentUser, password: newPassword }
-    localStorage.setItem('currentUser', JSON.stringify(updatedCurrent))
+    await update(ref(db, `users/${currentUser.id}`), { password: newPassword })
+    localStorage.setItem('currentUser', JSON.stringify({ ...currentUser, password: newPassword }))
 
     setPwMsg({ type: 'success', text: "Parol muvaffaqiyatli o'zgartirildi" })
     setOldPassword('')
@@ -90,8 +97,6 @@ export default function TeacherProfilePage() {
       <h1 className="tpp-title">Mening profilim</h1>
 
       <div className="tpp-grid">
-
-        {/* ── PROFIL KARTASI ── */}
         <div className="tpp-card">
           <div className="tpp-avatar-wrap">
             <div className="tpp-avatar">{initials}</div>
@@ -126,7 +131,6 @@ export default function TeacherProfilePage() {
           </div>
         </div>
 
-        {/* ── STATISTIKA ── */}
         <div className="tpp-card">
           <h3 className="tpp-section-title">Faoliyat statistikasi</h3>
           <div className="tpp-stats-grid">
@@ -161,7 +165,6 @@ export default function TeacherProfilePage() {
           </div>
         </div>
 
-        {/* ── PAROL O'ZGARTIRISH ── */}
         <div className="tpp-card tpp-full">
           <h3 className="tpp-section-title">
             <Lock size={18} /> Parolni o'zgartirish
@@ -228,7 +231,6 @@ export default function TeacherProfilePage() {
             </button>
           </form>
         </div>
-
       </div>
     </div>
   )

@@ -30,18 +30,22 @@ const Login = () => {
     });
   };
 
-  const handleLogin = (e) => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+    setIsLoading(true)
 
-    const result = login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
+    setIsLoading(false)
 
     if (!result.success) {
       setErrorMsg(result.message);
       return;
     }
 
-    // Rol asosida yo'naltirish (Talab 4.1, 4.2, 4.3)
+    // Rol asosida yo'naltirish
     if (result.role === "admin" || result.role === "teacher") {
       navigate("/teacher");
     } else {
@@ -108,8 +112,9 @@ const Login = () => {
         <button
           type="submit"
           className="login-btn"
+          disabled={isLoading}
         >
-          Kirish
+          {isLoading ? 'Yuklanmoqda...' : 'Kirish'}
         </button>
 
         {/* "Ro'yxatdan o'ting" havolasi olib tashlandi (Talab 3.2) */}

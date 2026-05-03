@@ -1,12 +1,19 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { FiUsers, FiUser, FiUserCheck } from 'react-icons/fi'
 import './AdminDashboard.css'
 
 export default function AdminDashboard() {
   const { getUsers } = useAuth()
+  const [users, setUsers] = useState([])
 
-  const users = useMemo(() => getUsers(), [])
+  useEffect(() => {
+    const load = async () => {
+      const list = await getUsers()
+      setUsers(list)
+    }
+    load()
+  }, [])
 
   const teacherCount = users.filter((u) => u.role === 'teacher').length
   const studentCount = users.filter((u) => u.role === 'student').length

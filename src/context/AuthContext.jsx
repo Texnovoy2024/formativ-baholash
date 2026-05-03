@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const navigate = useNavigate()
 
-  // Sahifa yangilanishida sessiyani tiklash
+  // Sahifa yangilanishida sessiyani tiklash (localStorage dan)
   useEffect(() => {
     try {
       const savedUser = JSON.parse(localStorage.getItem('currentUser'))
@@ -24,14 +24,14 @@ export const AuthProvider = ({ children }) => {
         setUser(savedUser)
       }
     } catch {
-      // Buzilgan JSON — tizimdan chiqarish
       localStorage.removeItem('currentUser')
       setUser(null)
     }
   }, [])
 
-  const login = (email, password) => {
-    const result = loginFn(email, password)
+  // Login — async
+  const login = async (email, password) => {
+    const result = await loginFn(email, password)
     if (result.success) {
       const savedUser = JSON.parse(localStorage.getItem('currentUser'))
       setUser(savedUser)
@@ -45,11 +45,14 @@ export const AuthProvider = ({ children }) => {
     navigate('/login')
   }
 
-  const addUser = (userData) => addUserFn(userData)
+  // addUser — async
+  const addUser = async (userData) => addUserFn(userData)
 
-  const deleteUser = (userId) => deleteUserFn(userId)
+  // deleteUser — async
+  const deleteUser = async (userId) => deleteUserFn(userId)
 
-  const getUsers = () => getUsersFn()
+  // getUsers — async
+  const getUsers = async () => getUsersFn()
 
   const register = () => registerFn()
 
@@ -63,7 +66,6 @@ export const AuthProvider = ({ children }) => {
         deleteUser,
         getUsers,
         register,
-        // Orqaga moslik uchun
         addTeacher: addUser,
       }}
     >

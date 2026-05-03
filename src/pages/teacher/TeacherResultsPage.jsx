@@ -1,24 +1,27 @@
 import { useEffect, useState, useMemo } from "react"
 import {
-  BarChart3,
-  Target,
-  Trophy,
-  AlertTriangle,
-  Brain,
-  Users,
-  Clock,
-  TrendingUp,
-  ChevronDown,
-  ChevronUp,
-  Medal,
-  Search,
-  BookOpen,
+  BarChart3, Target, Trophy, AlertTriangle, Brain,
+  Users, Clock, TrendingUp, ChevronDown, ChevronUp,
+  Medal, Search, BookOpen,
 } from "lucide-react"
 import "./TeacherResultsPage.css"
+import {
+  getExamResultsFn,
+  getProjectSubmissionsFn,
+  getAllExamsFn,
+  getAllProjectsFn,
+  getTasksFn,
+  getAllClassesFn,
+  getStoredUsers,
+} from "../../context/authUtils"
 
 export default function TeacherResultsPage() {
   const [examResults, setExamResults] = useState([])
   const [allExams, setAllExams] = useState([])
+  const [allClasses, setAllClasses] = useState([])
+  const [studentMap, setStudentMap] = useState({})
+  const [loading, setLoading] = useState(true)
+
   const [selectedExam, setSelectedExam] = useState("all")
   const [selectedClass, setSelectedClass] = useState("all")
   const [search, setSearch] = useState("")
@@ -26,111 +29,84 @@ export default function TeacherResultsPage() {
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
 
-  // Barcha sinflarni yig'ish (admin + teacher sinflar)
-  const allClasses = useMemo(() => {
-    const result = []
-    try {
-      const adminClasses = JSON.parse(localStorage.getItem("admin_classes")) || []
-      adminClasses.forEach(c => result.push({ ...c, source: "admin" }))
-    } catch { /* skip */ }
-    try {
-      const storedUsers = JSON.parse(localStorage.getItem("users")) || []
-      storedUsers.filter(u => u.role === "teacher").forEach(t => {
-        const tc = JSON.parse(localStorage.getItem(`classes_${t.id}`)) || []
-        tc.forEach(c => {
-          if (!result.find(r => String(r.id) === String(c.id)))
-            result.push({ ...c, source: "teacher" })
-        })
-      })
-    } catch { /* skip */ }
-    return result
-  }, [])
+  useEffect(() => {
+    const load = async () => {
+      const [results, exams, projectSubs, projects, tasks, classes, users] =
+        await Promise.all([
+          getExamResultsFn(),
+          getAllExamsFn(),
+          getProjectSubmissionsFn(),
+          getAllProjectsFn(),
+          getTasksFn(currentUser?.id),
+          getAllClassesFn(),
+          getStoredUsers(),
+        ])
 
-  // Studentlar va ularning classId lari
-  const studentMap = useMemo(() => {
-    const map = {}
-    try {
-      const users = JSON.parse(localStorage.getItem("users")) || []
+      // Student map
+      const map = {}
       users.filter(u => u.role === "student").forEach(u => {
         map[String(u.id)] = u
       })
-    } catch { /* skip */ }
-    return map
+      setStudentMap(map)
+      setAllClasses(classes)
+
+      const myExams = exams.filter(e => e.teacherId === currentUser?.id)
+      const myExamIds = myExams.map(e => e.id)
+
+      const examFiltered = results.filter(r => myExamIds.includes(r.examId))
+
+      const myProjectTaskIds = tasks
+        .filter(t => t.type === "project")
+        .map(t => String(t.id))
+
+      const projectResults = projectSubs
+        .filter(s => myProjectTaskIds.includes(String(s.projectId)))
+        .map(s => {
+          const project = projects.find(p => String(p.id) === String(s.projectId))
+          const student = users.find(u => String(u.id) === String(s.studentId))
+          return {
+            examId: s.projectId,
+            examTitle: project?.title || "Loyiha",
+            studentId: s.studentId,
+            studentName: student?.name || s.studentName || "Noma'lum",
+            score: s.score || 0,
+            total: Number(project?.maxScore) || 100,
+            date: s.submittedAt,
+            type: "project",
+            answers: [],
+          }
+        })
+
+      const combined = [...examFiltered, ...projectResults]
+
+      const projectExamEntries = tasks
+        .filter(t => t.type === "project")
+        .map(t => ({ id: t.id, examTitle: t.title }))
+
+      setExamResults(combined)
+      setAllExams([...myExams, ...projectExamEntries])
+      setLoading(false)
+    }
+    load()
   }, [])
 
   const getClassName = (classId) => {
     if (!classId) return null
-    const found = allClasses.find(c => String(c.id) === String(classId))
-    return found?.name || null
+    return allClasses.find(c => String(c.id) === String(classId))?.name || null
   }
 
-  useEffect(() => {
-    const results = JSON.parse(localStorage.getItem("examResults")) || []
-    const exams = JSON.parse(localStorage.getItem("allExams")) || []
-    const projectSubs = JSON.parse(localStorage.getItem("projectSubmissions")) || []
-    const allProjects = JSON.parse(localStorage.getItem("allProjects")) || []
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || []
-
-    const myExams = exams.filter(e => e.teacherId === currentUser?.id)
-    const myExamIds = myExams.map(e => e.id)
-
-    // Test natijalari
-    const examFiltered = results.filter(r => myExamIds.includes(r.examId))
-
-    // Teacher ning topshiriqlari (tasks) dan project id larini topish
-    const tasksKey = `tasks_${currentUser?.id}`
-    const myTasks = (() => {
-      try { return JSON.parse(localStorage.getItem(tasksKey)) || [] } catch { return [] }
-    })()
-    const myProjectTaskIds = myTasks.filter(t => t.type === "project").map(t => String(t.id))
-
-    // Project topshirishlarni exam natijasi formatiga o'tkazish
-    const projectResults = projectSubs
-      .filter(s => myProjectTaskIds.includes(String(s.projectId)))
-      .map(s => {
-        const project = allProjects.find(p => String(p.id) === String(s.projectId))
-        const student = storedUsers.find(u => String(u.id) === String(s.studentId))
-        return {
-          examId: s.projectId,
-          examTitle: project?.title || "Loyiha",
-          studentId: s.studentId,
-          studentName: student?.name || s.studentName || "Noma'lum",
-          score: s.score || 0,
-          total: Number(project?.maxScore) || 100,
-          date: s.submittedAt,
-          type: "project",
-          answers: [],
-        }
-      })
-
-    const combined = [...examFiltered, ...projectResults]
-
-    // Imtihonlar ro'yxatiga loyihalarni ham qo'shish (filter uchun)
-    const projectExamEntries = myTasks
-      .filter(t => t.type === "project")
-      .map(t => ({ id: t.id, examTitle: t.title }))
-
-    setExamResults(combined)
-    setAllExams([...myExams, ...projectExamEntries])
-  }, [])
-
-  /* ── Filter by exam + class + search ── */
   const filtered = useMemo(() => {
     return examResults.filter(r => {
       const examMatch = selectedExam === "all" || String(r.examId) === String(selectedExam)
-
       const student = studentMap[String(r.studentId)]
       const classMatch = selectedClass === "all" ||
         String(student?.classId) === String(selectedClass)
-
       const searchMatch = !search ||
         (r.studentName || "").toLowerCase().includes(search.toLowerCase())
-
       return examMatch && classMatch && searchMatch
     })
   }, [examResults, selectedExam, selectedClass, search, studentMap])
 
-  /* ── General stats ── */
   const totalSubmissions = filtered.length
   const averageScore = totalSubmissions > 0
     ? (filtered.reduce((a, b) => a + b.score, 0) / totalSubmissions).toFixed(1) : 0
@@ -138,7 +114,6 @@ export default function TeacherResultsPage() {
   const passCount = filtered.filter(r => r.total > 0 && r.score / r.total >= 0.6).length
   const passRate = totalSubmissions > 0 ? ((passCount / totalSubmissions) * 100).toFixed(0) : 0
 
-  /* ── Unique students ── */
   const uniqueStudents = useMemo(() => {
     const map = {}
     filtered.forEach(r => {
@@ -160,7 +135,6 @@ export default function TeacherResultsPage() {
     })
   }, [filtered, studentMap])
 
-  /* ── Hard questions ── */
   const difficultQuestions = useMemo(() => {
     const stats = {}
     filtered.forEach(result => {
@@ -177,7 +151,6 @@ export default function TeacherResultsPage() {
       .sort((a, b) => b.wrong - a.wrong)
   }, [filtered])
 
-  /* ── Score distribution ── */
   const scoreDistribution = useMemo(() => {
     const buckets = { "0-20%": 0, "21-40%": 0, "41-60%": 0, "61-80%": 0, "81-100%": 0 }
     filtered.forEach(r => {
@@ -201,10 +174,10 @@ export default function TeacherResultsPage() {
 
   const medalColor = i => ["#f59e0b", "#9ca3af", "#b45309"][i] || "#e5e7eb"
 
+  if (loading) return <div className="tr-container"><p>Yuklanmoqda...</p></div>
+
   return (
     <div className="tr-container">
-
-      {/* ── HEADER ── */}
       <div className="tr-header-row">
         <h1 className="tr-title">
           <BarChart3 size={24} />
@@ -212,9 +185,7 @@ export default function TeacherResultsPage() {
         </h1>
       </div>
 
-      {/* ── FILTERS TOOLBAR ── */}
       <div className="tr-toolbar">
-        {/* Search */}
         <div className="tr-search-box">
           <Search size={15} className="tr-search-icon" />
           <input
@@ -224,7 +195,6 @@ export default function TeacherResultsPage() {
           />
         </div>
 
-        {/* Exam filter */}
         <select
           className="tr-exam-select"
           value={selectedExam}
@@ -236,7 +206,6 @@ export default function TeacherResultsPage() {
           ))}
         </select>
 
-        {/* Class filter */}
         <select
           className="tr-exam-select"
           value={selectedClass}
@@ -249,7 +218,6 @@ export default function TeacherResultsPage() {
         </select>
       </div>
 
-      {/* ── SUMMARY CARDS ── */}
       <div className="tr-summary-grid">
         <div className="tr-summary-card">
           <div className="tr-card-icon blue"><Target size={20} /></div>
@@ -280,7 +248,6 @@ export default function TeacherResultsPage() {
         </div>
       ) : (
         <>
-          {/* ── SCORE DISTRIBUTION ── */}
           <div className="tr-section">
             <h2><BarChart3 size={20} /> Ball taqsimoti</h2>
             <div className="tr-distribution">
@@ -296,7 +263,6 @@ export default function TeacherResultsPage() {
             </div>
           </div>
 
-          {/* ── STUDENT RESULTS ── */}
           <div className="tr-section">
             <h2><Users size={20} /> O'quvchilar natijalari</h2>
             <div className="tr-student-list">
@@ -361,7 +327,6 @@ export default function TeacherResultsPage() {
             </div>
           </div>
 
-          {/* ── HARD QUESTIONS ── */}
           <div className="tr-section">
             <h2><AlertTriangle size={20} /> Eng qiyin savollar <span className="tr-threshold">(3+ xato)</span></h2>
             {difficultQuestions.length === 0 ? (

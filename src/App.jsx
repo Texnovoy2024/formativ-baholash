@@ -33,6 +33,7 @@ import ProjectSubmissionsPage from './pages/teacher/ProjectSubmissionsPage'
 import AdminPanel from './pages/admin/AdminPanel'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AllUsersPage from './pages/admin/AllUsersPage'
+import AdminClassesPage from './pages/admin/AdminClassesPage'
 
 /* Student */
 import StudentLayout from './pages/student/StudentLayout'
@@ -142,6 +143,14 @@ function App() {
 						element={
 							<ProtectedRoute allowedRole='admin'>
 								<AllUsersPage />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path='classes'
+						element={
+							<ProtectedRoute allowedRole='admin'>
+								<AdminClassesPage />
 							</ProtectedRoute>
 						}
 					/>

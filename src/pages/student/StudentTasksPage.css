@@ -98,9 +98,103 @@
   cursor: not-allowed;
 }
 
-/* EMPTY */
+/* ================= EXPIRED STATE ================= */
+.st-card--expired {
+  opacity: 0.75;
+  border: 1px solid #fecaca;
+}
+
+.st-badge--expired {
+  background: #ef4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.st-expired {
+  background: #fee2e2;
+  color: #dc2626;
+  cursor: not-allowed;
+  font-weight: 600;
+}
+
+.st-deadline-info {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.st-deadline-info--expired {
+  color: #dc2626;
+}
 .st-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.st-empty-icon {
+  width: 80px;
+  height: 80px;
+  background: #f1f5f9;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 20px;
+  color: #cbd5e1;
+}
+
+.st-empty h2 {
+  color: #1e293b;
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.st-empty p {
+  font-size: 15px;
+}
+
+/* ================= SKELETON ================= */
+.st-card.skeleton {
+  pointer-events: none;
+  border: none;
+  background: #f8fafc;
+}
+
+.skeleton-title, .skeleton-info, .skeleton-btn {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 70%;
+  margin-bottom: 20px;
+}
+
+.skeleton-info {
+  height: 40px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.skeleton-btn {
+  height: 44px;
+  width: 100%;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

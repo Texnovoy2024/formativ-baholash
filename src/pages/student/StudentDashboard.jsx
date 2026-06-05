@@ -23,21 +23,15 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [allExamResults, allProjectSubmissions, allUsers] =
+      const [myExamResults, myProjectResults, allExamResults, allProjectSubmissions, allUsers] =
         await Promise.all([
+          getExamResultsFn(currentUser?.id),
+          getProjectSubmissionsFn(currentUser?.id),
           getExamResultsFn(),
           getProjectSubmissionsFn(),
           getStoredUsers(),
         ])
-
-      const myExamResults = allExamResults.filter(
-        r => r.studentId === currentUser?.id
-      )
-      const myProjectResults = allProjectSubmissions.filter(
-        s =>
-          String(s.studentId) === String(currentUser?.id) &&
-          s.score !== null
-      )
+      // Results are already fetched in myExamResults and myProjectResults
 
       const formattedExams = myExamResults.map((r, index) => ({
         name: `Test ${index + 1}`,

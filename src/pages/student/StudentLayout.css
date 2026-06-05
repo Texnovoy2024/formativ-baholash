@@ -84,3 +84,22 @@
 		margin-left: 250px;
 	}
 }
+
+/* ── EXAM LOCK ─────────────────────────── */
+.sidebar-exam-warning {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.sidebar-nav--locked a,
+.nav-locked {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { Clock, CheckCircle, AlertTriangle, Send } from "lucide-react"
 import "./StudentExamPage.css"
-import { getAllExamsFn, addExamResultFn } from "../../context/authUtils"
+import { getAllExamsFn, addExamResultFn, getExamResultsFn } from "../../context/authUtils"
 
 export default function StudentExamPage() {
   const { examId } = useParams()
@@ -20,17 +20,52 @@ export default function StudentExamPage() {
   /* ================= LOAD EXAM ================= */
   useEffect(() => {
     const load = async () => {
-      const allExams = await getAllExamsFn()
+      const [allExams, allResults] = await Promise.all([
+        getAllExamsFn(),
+        getExamResultsFn(currentUser?.id)
+      ])
+      
       const found = allExams.find(e => String(e.id) === String(examId))
-
       if (!found) return navigate("/student/tasks")
+
+      // Deadline tekshiruvi — muddat o'tgan bo'lsa bloklash
+      if (found.deadline && new Date(found.deadline) < new Date()) {
+        alert("Bu testning muddati tugagan. Topshira olmaysiz.")
+        return navigate("/student/tasks")
+      }
+
+      // Check if already taken
+      const alreadyTaken = allResults.some(
+        r => String(r.examId) === String(examId) && String(r.studentId) === String(currentUser?.id)
+      )
+      if (alreadyTaken) {
+        alert("Siz bu imtihonni topshirib bo'lgansiz!")
+        return navigate("/student/results")
+      }
 
       const limit = Number(found.timeLimit)
       if (!limit || limit <= 0) return
 
       setExam(found)
-      const deadline = Date.now() + limit * 60 * 1000
-      setEndTime(deadline)
+
+      // Refresh da vaqtni tiklash: localStorage da saqlanган endTime bor bo'lsa ishlatamiz
+      const storageKey = `examEndTime_${examId}_${currentUser?.id}`
+      const savedEndTime = localStorage.getItem(storageKey)
+
+      let resolvedEndTime
+      if (savedEndTime && Number(savedEndTime) > Date.now()) {
+        // Avval boshlangan — qolgan vaqtdan davom etish
+        resolvedEndTime = Number(savedEndTime)
+      } else {
+        // Yangi boshlanish — endTime ni hisoblab localStorage ga yozish
+        resolvedEndTime = Date.now() + limit * 60 * 1000
+        localStorage.setItem(storageKey, String(resolvedEndTime))
+      }
+
+      // Aktiv exam ni localStorage ga belgilash (sidebar bloki uchun)
+      localStorage.setItem("activeExamId", examId)
+
+      setEndTime(resolvedEndTime)
     }
     load()
   }, [examId])
@@ -56,28 +91,38 @@ export default function StudentExamPage() {
     setAnswers(prev => ({ ...prev, [questionId]: optionIndex }))
   }
 
+  /* ================= EXAM TUGAGANDA TOZALASH ================= */
+  const clearExamStorage = () => {
+    const storageKey = `examEndTime_${examId}_${currentUser?.id}`
+    localStorage.removeItem(storageKey)
+    localStorage.removeItem("activeExamId")
+  }
+
   /* ================= SAVE RESULT ================= */
   const saveResult = async () => {
     let score = 0
     exam.questions.forEach(q => {
       if (answers[q.id] === q.correctIndex) {
-        score += q.points
+        score += Number(q.points || 0)
       }
     })
 
     const result = {
-      examId: exam.id,
+      examId: String(exam.id),
       examTitle: exam.examTitle,
-      studentId: currentUser.id,
+      teacherId: String(exam.teacherId), // String ga o'tkazish
+      classId: String(currentUser.classId || ""), // String ga o'tkazish
+      studentId: String(currentUser.id),
       studentName: currentUser.name || currentUser.fullName || "Noma'lum",
-      score,
-      total: exam.questions.reduce((sum, q) => sum + q.points, 0),
+      score: Number(score),
+      total: Number(exam.questions.reduce((sum, q) => sum + Number(q.points || 0), 0)),
       date: new Date().toISOString(),
       answers: exam.questions.map(q => ({
         questionId: q.id,
         questionText: q.text,
-        correct: answers[q.id] === q.correctIndex,
-        chosen: answers[q.id],
+        options: q.options,
+        correct: (answers[q.id] ?? null) === q.correctIndex,
+        chosen: answers[q.id] ?? null,
         correctIndex: q.correctIndex,
       })),
     }
@@ -88,12 +133,14 @@ export default function StudentExamPage() {
   const autoSubmit = async () => {
     if (isFinished) return
     setIsFinished(true)
+    clearExamStorage()
     await saveResult()
     navigate("/student/results")
   }
 
   const confirmFinish = async () => {
     setIsFinished(true)
+    clearExamStorage()
     await saveResult()
     navigate("/student/results")
   }

@@ -150,6 +150,45 @@ textarea {
   font-weight: 600;
 }
 
+/* ===== QUESTION CARD STYLES (3-rasmdagidek) ===== */
+
+.question-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.options-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.option-item {
+  padding: 3px 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.option-item.correct {
+  color: #16a34a;
+  font-weight: 600;
+  list-style-type: disc;
+}
+
+.option-item.correct::marker {
+  color: #16a34a;
+}
+
+.empty-option {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 13px;
+}
+
 .exam-summary {
   margin-top: 10px;
   font-weight: 600;

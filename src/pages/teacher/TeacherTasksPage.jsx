@@ -7,7 +7,25 @@ import {
   getTasksFn,
   saveTasksFn,
   getAllClassesFn,
+  saveExamFn,
+  getAllExamsFn,
 } from "../../context/authUtils"
+
+// O'zbekcha sana formatlash: "2026-yil 5-iyun, 14:30"
+const UZBEK_MONTHS = [
+  "yanvar","fevral","mart","aprel","may","iyun",
+  "iyul","avgust","sentabr","oktabr","noyabr","dekabr"
+]
+
+function formatDeadlineUz(dateStr) {
+  const d = new Date(dateStr)
+  const day = d.getDate()
+  const month = UZBEK_MONTHS[d.getMonth()]
+  const year = d.getFullYear()
+  const hours = String(d.getHours()).padStart(2, "0")
+  const minutes = String(d.getMinutes()).padStart(2, "0")
+  return `${year}-yil ${day}-${month}, ${hours}:${minutes}`
+}
 
 export default function TeacherTasksPage() {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
@@ -21,6 +39,7 @@ export default function TeacherTasksPage() {
   const [description, setDescription] = useState("")
   const [type, setType] = useState("homework")
   const [selectedClassId, setSelectedClassId] = useState("")
+  const [deadline, setDeadline] = useState("")
 
   const [search, setSearch] = useState("")
   const [sortAsc, setSortAsc] = useState(true)
@@ -28,6 +47,7 @@ export default function TeacherTasksPage() {
   const [editingId, setEditingId] = useState(null)
   const [editedTitle, setEditedTitle] = useState("")
   const [editedDescription, setEditedDescription] = useState("")
+  const [editedDeadline, setEditedDeadline] = useState("")
 
   const [deleteId, setDeleteId] = useState(null)
 
@@ -58,6 +78,8 @@ export default function TeacherTasksPage() {
       type,
       classId: selectedClassId,
       createdAt: new Date().toISOString(),
+      // deadline faqat test uchun saqlanadi, boshqalarda null
+      deadline: type === "test" && deadline ? deadline : null,
       questions: [],
     }
 
@@ -67,22 +89,47 @@ export default function TeacherTasksPage() {
 
     setTitle("")
     setDescription("")
+    setDeadline("")
   }
 
   const startEdit = (task) => {
     setEditingId(task.id)
     setEditedTitle(task.title)
-    setEditedDescription(task.description)
+    setEditedDescription(task.description || "")
+    // deadline-local input uchun "YYYY-MM-DDTHH:mm" format kerak
+    setEditedDeadline(task.deadline
+      ? new Date(task.deadline).toISOString().slice(0, 16)
+      : ""
+    )
   }
 
   const saveEdit = async () => {
+    const editingTask = tasks.find(t => t.id === editingId)
+    const newDeadline = editingTask?.type === "test" && editedDeadline
+      ? editedDeadline
+      : editingTask?.deadline || null
+
     const updated = tasks.map((t) =>
       t.id === editingId
-        ? { ...t, title: editedTitle, description: editedDescription }
+        ? { ...t, title: editedTitle, description: editedDescription, deadline: newDeadline }
         : t
     )
     setTasks(updated)
     await updateStorage(updated)
+
+    // Agar test bo'lsa — allExams da ham deadline ni yangilash
+    if (editingTask?.type === "test") {
+      try {
+        const allExams = await getAllExamsFn(true)
+        const exam = allExams.find(e => String(e.id) === String(editingId))
+        if (exam) {
+          await saveExamFn({ ...exam, deadline: newDeadline })
+        }
+      } catch (err) {
+        console.error("Exam deadline update error:", err)
+      }
+    }
+
     setEditingId(null)
   }
 
@@ -147,6 +194,22 @@ export default function TeacherTasksPage() {
             </option>
           ))}
         </select>
+
+        {/* Deadline — faqat test uchun */}
+        {type === "test" && (
+          <div className="teacher-deadline-row">
+            <label className="teacher-deadline-label">
+              <CalendarDays size={16} />
+              Muddat (oxirgi sana va vaqt)
+            </label>
+            <input
+              type="datetime-local"
+              className="teacher-input"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+            />
+          </div>
+        )}
 
         <button className="teacher-btn-primary" onClick={handleAddTask}>
           Qo'shish
@@ -228,6 +291,31 @@ export default function TeacherTasksPage() {
                   onChange={(e) => setEditedDescription(e.target.value)}
                 />
 
+                {/* Deadline edit — faqat test uchun */}
+                {task.type === "test" && (
+                  <div className="teacher-deadline-row">
+                    <label className="teacher-deadline-label">
+                      <CalendarDays size={15} />
+                      Muddat (oxirgi sana va vaqt)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="teacher-input"
+                      value={editedDeadline}
+                      onChange={(e) => setEditedDeadline(e.target.value)}
+                    />
+                    {editedDeadline && (
+                      <button
+                        className="teacher-deadline-clear"
+                        onClick={() => setEditedDeadline("")}
+                        type="button"
+                      >
+                        Muddatni o'chirish
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 <div className="teacher-task-actions">
                   <button onClick={saveEdit}>
                     <Save size={16} />
@@ -244,10 +332,28 @@ export default function TeacherTasksPage() {
                   {task.description || "Tavsif yo'q"}
                 </p>
 
-                <div className="teacher-task-meta">
-                  <CalendarDays size={14} />
-                  {new Date(task.createdAt).toLocaleDateString()}
-                </div>
+                {/* Sinf ko'rsatish */}
+                {task.classId && (
+                  <div className="teacher-task-class">
+                    {classes.find(c => String(c.id) === String(task.classId))?.name || task.classId}
+                  </div>
+                )}
+
+                {/* Deadline — faqat test uchun */}
+                {task.type === "test" && task.deadline && (
+                  <div className={`teacher-task-deadline ${new Date(task.deadline) < new Date() ? "expired" : ""}`}>
+                    <CalendarDays size={13} />
+                    Muddat: {formatDeadlineUz(task.deadline)}
+                    {new Date(task.deadline) < new Date() && " — Tugagan"}
+                  </div>
+                )}
+
+                {task.type === "test" && !task.deadline && (
+                  <div className="teacher-task-deadline no-deadline">
+                    <CalendarDays size={13} />
+                    Muddat belgilanmagan
+                  </div>
+                )}
 
                 <div className="teacher-task-actions">
                   <button onClick={() => startEdit(task)}>

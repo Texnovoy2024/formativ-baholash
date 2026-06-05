@@ -77,6 +77,9 @@ export default function TeacherLayout() {
 								<NavLink to='/teacher/all-users' onClick={handleLinkClick}>
 									Barcha foydalanuvchilar
 								</NavLink>
+								<NavLink to='/teacher/classes' onClick={handleLinkClick}>
+									Sinflar
+								</NavLink>
 							</>
 						)}
 					</nav>

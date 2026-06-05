@@ -93,3 +93,247 @@
   align-items: center;
   font-size: 14px;
 }
+
+.sr-details-btn {
+  margin-top: 15px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.sr-details-btn:hover {
+  background: #1d4ed8;
+}
+
+/* MODAL */
+.sr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.sr-modal {
+  background: white;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+
+.sr-modal-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sr-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.sr-modal-content {
+  padding: 25px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sr-ans-card {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.sr-ans-card.correct {
+  border-left: 5px solid #10b981;
+  background: #f0fdf4;
+}
+
+.sr-ans-card.wrong {
+  border-left: 5px solid #ef4444;
+  background: #fef2f2;
+}
+
+.sr-ans-q {
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.sr-ans-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sr-ans-opt {
+  padding: 10px 15px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sr-opt-marker {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.sr-ans-opt.correct-opt {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.sr-ans-opt.wrong-opt {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.sr-opt-icon {
+  margin-left: auto;
+  color: #10b981;
+}
+
+/* ── MODAL HEADER UPDATED ────────────── */
+.sr-modal-title-group h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.sr-modal-title-group p  { margin: 3px 0 0; font-size: 13px; color: #6b7280; }
+
+.sr-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sr-print-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  opacity: 1;
+}
+.sr-print-btn:hover { background: #1d4ed8; }
+
+.sr-close-btn {
+  background: #f1f5f9;
+  border: none;
+  font-size: 20px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+}
+.sr-close-btn:hover { background: #e2e8f0; }
+
+/* ── PRINT HEADER (faqat print da) ───── */
+.sr-print-header { display: none; }
+.sr-empty-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: #94a3b8;
+}
+.sr-empty-page h2 { color: #1e293b; margin: 16px 0 8px; }
+.sr-empty-page p  { font-size: 15px; }
+.sr-empty-icon {
+  width: 80px; height: 80px;
+  background: #f1f5f9;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #cbd5e1;
+}
+
+/* ── PRINT STYLES ────────────────────── */
+@media print {
+  /* #root ichidagi hamma narsani yashir */
+  #root > * { display: none !important; }
+
+  /* Faqat overlay va modal ni ko'rsat */
+  #root .sr-modal-overlay { display: flex !important; }
+  #root .sr-modal-overlay .sr-printable {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    background: white !important;
+  }
+
+  .sr-modal-overlay {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Tugmalarni yashir */
+  .sr-print-btn,
+  .sr-close-btn { display: none !important; }
+
+  /* Print header ko'rsat */
+  .sr-print-header {
+    display: block !important;
+    padding: 0 0 16px 0;
+    margin-bottom: 20px;
+  }
+  .sr-print-header h2 { font-size: 20px; margin: 0 0 8px; }
+  .sr-print-header p  { font-size: 13px; margin: 3px 0; color: #374151; }
+  .sr-print-header hr { margin-top: 14px; border-color: #e5e7eb; }
+
+  @page {
+    margin: 20mm 15mm;
+    size: A4;
+  }
+
+  .sr-ans-card {
+    break-inside: avoid;
+    border: 1px solid #d1d5db !important;
+    margin-bottom: 12px;
+    background: white !important;
+  }
+  .sr-ans-card.correct { border-left: 4px solid #10b981 !important; }
+  .sr-ans-card.wrong   { border-left: 4px solid #ef4444 !important; }
+  .sr-ans-opt.correct-opt { background: #ecfdf5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sr-ans-opt.wrong-opt   { background: #fef2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

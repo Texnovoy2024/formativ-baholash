@@ -1,14 +1,40 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom"
+import { useState, useEffect } from "react"
 import "./StudentLayout.css"
 
 export default function StudentLayout() {
 	const navigate = useNavigate()
+	const location = useLocation()
 	const [open, setOpen] = useState(false)
+	const [activeExamId, setActiveExamId] = useState(null)
+
+	// Har render da aktiv exam borligini tekshir
+	useEffect(() => {
+		const examId = localStorage.getItem("activeExamId")
+		setActiveExamId(examId || null)
+	}, [location.pathname])
+
+	// Exam sahifasida emasligini aniqlash
+	const isOnExam = location.pathname.startsWith("/student/exam/")
+
+	// Aktiv exam bor va exam sahifasida emas — qaytarish
+	useEffect(() => {
+		if (activeExamId && !isOnExam) {
+			navigate(`/student/exam/${activeExamId}`, { replace: true })
+		}
+	}, [activeExamId, isOnExam])
 
 	const handleLogout = () => {
 		localStorage.removeItem("currentUser")
 		navigate("/")
+	}
+
+	const handleNavClick = (e) => {
+		if (activeExamId && !isOnExam) {
+			e.preventDefault()
+			return
+		}
+		setOpen(false)
 	}
 
 	return (
@@ -27,20 +53,44 @@ export default function StudentLayout() {
 				<div>
 					<h2>O'quvchi oynasi</h2>
 
-					<nav className="sidebar-nav">
-						<NavLink to="/student" end onClick={() => setOpen(false)}>
+					{/* Aktiv exam banner */}
+					{activeExamId && (
+						<div className="sidebar-exam-warning">
+							⚠️ Test jarayonida sahifalarni almashtirish mumkin emas
+						</div>
+					)}
+
+					<nav className={`sidebar-nav ${activeExamId ? "sidebar-nav--locked" : ""}`}>
+						<NavLink
+							to="/student"
+							end
+							onClick={handleNavClick}
+							className={activeExamId ? "nav-locked" : ""}
+						>
 							Boshqaruv paneli
 						</NavLink>
 
-						<NavLink to="/student/tasks" onClick={() => setOpen(false)}>
+						<NavLink
+							to="/student/tasks"
+							onClick={handleNavClick}
+							className={activeExamId ? "nav-locked" : ""}
+						>
 							Topshiriqlar
 						</NavLink>
 
-						<NavLink to="/student/results" onClick={() => setOpen(false)}>
+						<NavLink
+							to="/student/results"
+							onClick={handleNavClick}
+							className={activeExamId ? "nav-locked" : ""}
+						>
 							Natijalar
 						</NavLink>
 
-						<NavLink to="/student/profile" onClick={() => setOpen(false)}>
+						<NavLink
+							to="/student/profile"
+							onClick={handleNavClick}
+							className={activeExamId ? "nav-locked" : ""}
+						>
 							Profil
 						</NavLink>
 					</nav>

@@ -116,6 +116,7 @@ export default function ExamBuilder() {
 			maxTotalPoints,
 			questions: updatedQuestions,
 			isPublished,
+			deadline: task.deadline || null,
 		}
 
 		await saveTasksFn(currentUser?.id, updatedTasks)
@@ -226,51 +227,72 @@ export default function ExamBuilder() {
 		handleAddOrEdit()
 	}
 	const parseQuestions = text => {
-		const questionBlocks = text.split(/\n?\d+\.\s+/).filter(Boolean)
+		// PDF da matn spaceli keladi, normalize qilamiz
+		// "1. Savol A) opt B) opt ..." formatni ham, "\n" bilan kelganini ham qo'llab quvvatlaymiz
+
+		// Avval butun matnni normalize qilamiz:
+		// PDF spacing muammosi: "1 ." yoki "1." ikkalasini ham ushlash uchun
+		let normalizedText = text
+			// Raqam va nuqta orasidagi bo'sh joyni olib tashlaymiz: "1 ." → "1."
+			.replace(/(\d+)\s*\.\s*/g, '\n$1. ')
+			// Variant harflari oldidan yangi qator qo'shamiz (agar yo'q bo'lsa)
+			.replace(/\s([A-D])\)\s*/g, '\n$1) ')
+			// Javob/Answer oldidan yangi qator
+			.replace(/\s*(Javob|Answer)\s*:/gi, '\nJavob:')
+			.trim()
+
+		// Savollarni ajratamiz: "1. " dan boshlanuvchi bloklar
+		const questionBlocks = normalizedText.split(/\n(?=\d+\.\s)/).filter(s => s.trim())
+
+		if (questionBlocks.length === 0) {
+			alert("Savollar topilmadi. Hujjat formati to'g'ri emasligini tekshiring.\n\nFormat: '1. Savol matni\nA) variant\nB) variant\nC) variant\nD) variant\nJavob: A'")
+			return
+		}
 
 		const parsed = questionBlocks.map(block => {
-			// 🔹 Har doim 1 ball
-			const points = 1
+			const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
 
-			// 🔹 Javob kaliti parsing (Answer: B yoki Javob: C)
+			// 🔹 Savol matni — birinchi qator (raqam va nuqtasiz)
+			const questionLine = lines[0] || ''
+			const questionText = questionLine.replace(/^\d+\.\s*/, '').trim()
+
+			// 🔹 Variantlarni topish
+			const options = ['', '', '', '']
+			const optionLetters = ['A', 'B', 'C', 'D']
+
+			lines.forEach(line => {
+				optionLetters.forEach((letter, idx) => {
+					// "A) matn" yoki "A. matn" formatlarini qo'llab-quvvatlash
+					const match = line.match(new RegExp(`^${letter}[).]\\s*(.+)`, 'i'))
+					if (match) {
+						options[idx] = match[1].trim()
+					}
+				})
+			})
+
+			// 🔹 Javob kaliti — "Javob: B" yoki "Answer: B"
 			let correctIndex = null
-
-			const answerMatch = block.match(/Answer:\s*([A-D])/i)
-			const javobMatch = block.match(/Javob:\s*([A-D])/i)
-
-			const correctLetter = answerMatch?.[1] || javobMatch?.[1]
-
-			if (correctLetter) {
-				correctIndex = correctLetter.toUpperCase().charCodeAt(0) - 65
+			const answerLine = lines.find(l => /^(Javob|Answer)\s*:/i.test(l))
+			if (answerLine) {
+				const match = answerLine.match(/:\s*([A-D])/i)
+				if (match) {
+					correctIndex = match[1].toUpperCase().charCodeAt(0) - 65
+				}
 			}
-
-			// 🔹 Variant parsing
-			const optionMatches = block.match(
-				/A\)(.*?)B\)(.*?)C\)(.*?)D\)(.*?)(Answer:|Javob:|$)/s,
-			)
-
-			let options = ['', '', '', '']
-
-			if (optionMatches) {
-				options = [
-					optionMatches[1].trim(),
-					optionMatches[2].trim(),
-					optionMatches[3].trim(),
-					optionMatches[4].trim(),
-				]
-			}
-
-			// 🔹 Savol matni
-			const questionText = block.split(/A\)/)[0].trim()
 
 			return {
 				id: Date.now() + Math.random(),
 				text: questionText,
 				options,
 				correctIndex,
-				points, // ← HAR DOIM 1
+				points: 1,
 			}
-		})
+		}).filter(q => q.text.length > 0) // bo'sh savollarni o'tkazib yuboramiz
+
+		if (parsed.length === 0) {
+			alert("Hujjatdan savollar parse qilinmadi. Format to'g'riligini tekshiring.")
+			return
+		}
 
 		const updated = [...questions, ...parsed]
 		setQuestions(updated)
@@ -506,6 +528,7 @@ export default function ExamBuilder() {
     questions,
     teacherId: currentUser.id,
     classId: task.classId || null,
+    deadline: task.deadline || null,
     isPublished: true,
   }
 
@@ -596,33 +619,33 @@ export default function ExamBuilder() {
 				{filteredQuestions.map((q, i) => (
 					<div key={q.id} className='question-card'>
 						<div className='question-header'>
-							<strong>
+							<strong className='question-title'>
 								{i + 1}. {q.text}
 							</strong>
 							<span className='question-points'>{q.points} ball</span>
 						</div>
 
-						<ul>
+						<ul className='options-list'>
 							{q.options.map((opt, idx) => (
 								<li
 									key={idx}
-									className={idx === q.correctIndex ? 'correct' : ''}
+									className={`option-item ${idx === q.correctIndex ? 'correct' : ''}`}
 								>
-									{opt}
+									{opt || <span className='empty-option'>— bo'sh variant —</span>}
 								</li>
 							))}
 						</ul>
 
 						<div className='question-actions'>
-							<button onClick={() => startEdit(q)}>
+							<button onClick={() => startEdit(q)} title='Tahrirlash'>
 								<Pencil size={16} />
 							</button>
 
-							<button onClick={() => duplicateQuestion(q)}>
+							<button onClick={() => duplicateQuestion(q)} title='Nusxa olish'>
 								<Copy size={16} />
 							</button>
 
-							<button className='delete-btn' onClick={() => setDeleteId(q.id)}>
+							<button className='delete-btn' onClick={() => setDeleteId(q.id)} title="O'chirish">
 								<Trash2 size={16} />
 							</button>
 						</div>

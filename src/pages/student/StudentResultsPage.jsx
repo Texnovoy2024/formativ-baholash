@@ -125,7 +125,7 @@ export default function StudentResultsPage() {
       <p class="meta">Sana: ${date}</p>
       <hr>
       ${answersHtml}
-      <script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
+      <script>setTimeout(function(){window.print();window.onafterprint=function(){window.close()}},500)<\/script>
     </body></html>`
 
     const w = window.open('', '_blank', 'width=800,height=700')

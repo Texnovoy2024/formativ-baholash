@@ -242,7 +242,7 @@ export default function TeacherResultsPage() {
       <p class="meta">Sana: ${date}</p>
       <hr>
       ${answersHtml}
-      <script>setTimeout(function(){window.print();window.onafterprint=function(){window.close()}},500)<\/script>
+      <script>document.addEventListener('DOMContentLoaded',function(){window.print();window.onafterprint=function(){window.close()}})<\/script>
     </body></html>`
 
     const w = window.open('', '_blank', 'width=800,height=700')

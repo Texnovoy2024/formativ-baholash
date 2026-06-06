@@ -85,52 +85,8 @@ export default function StudentResultsPage() {
 
   const [selectedResult, setSelectedResult] = useState(null)
 
-  const handlePrint = (result) => {
-    const studentName = currentUser?.name || 'O\'quvchi'
-    const pct = result.total > 0 ? Math.round((result.score / result.total) * 100) : 0
-    const date = result.date ? new Date(result.date).toLocaleString('uz-UZ') : '—'
-
-    const answersHtml = result.answers?.map((ans, idx) => {
-      const opts = ans.options?.map((opt, oIdx) => {
-        let bg = '#ffffff'; let color = '#374151'; let border = '#e5e7eb'
-        if (oIdx === ans.correctIndex) { bg = '#ecfdf5'; color = '#065f46'; border = '#10b981' }
-        if (oIdx === ans.chosen && !ans.correct) { bg = '#fef2f2'; color = '#991b1b'; border = '#ef4444' }
-        const letter = ['A','B','C','D'][oIdx] || oIdx
-        const check = oIdx === ans.correctIndex ? ' ✓' : ''
-        return `<div style="padding:8px 12px;border-radius:8px;border:1px solid ${border};background:${bg};color:${color};margin-bottom:6px;font-size:13px"><b>${letter})</b> ${opt}${check}</div>`
-      }).join('') || ''
-
-      const cardBg = ans.correct ? '#f0fdf4' : '#fef2f2'
-      const cardBorder = ans.correct ? '#10b981' : '#ef4444'
-      return `
-        <div style="background:${cardBg};border:1px solid #e5e7eb;border-left:5px solid ${cardBorder};border-radius:10px;padding:16px;margin-bottom:14px;page-break-inside:avoid">
-          <div style="font-weight:600;font-size:14px;margin-bottom:12px;color:#0f172a">${idx+1}. ${ans.questionText || ''}</div>
-          ${opts}
-        </div>`
-    }).join('') || '<p>Ma\'lumotlar mavjud emas.</p>'
-
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-      <title>${result.examTitle} - ${studentName}</title>
-      <style>
-        body { font-family: Arial, sans-serif; padding: 24px 32px; color: #0f172a; }
-        h1 { font-size: 20px; margin: 0 0 6px; }
-        .meta { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
-        hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
-        @media print { @page { margin: 18mm 14mm; size: A4; } }
-      </style>
-    </head><body>
-      <h1>${result.examTitle}</h1>
-      <p class="meta">O'quvchi: <b>${studentName}</b></p>
-      <p class="meta">Ball: <b>${result.score} / ${result.total}</b> &nbsp;|&nbsp; Foiz: <b>${pct}%</b></p>
-      <p class="meta">Sana: ${date}</p>
-      <hr>
-      ${answersHtml}
-      <script>document.addEventListener('DOMContentLoaded',function(){window.print();window.onafterprint=function(){window.close()}})<\/script>
-    </body></html>`
-
-    const w = window.open('', '_blank', 'width=800,height=700')
-    w.document.write(html)
-    w.document.close()
+  const handlePrint = () => {
+    window.print()
   }
 
   if (loading) {

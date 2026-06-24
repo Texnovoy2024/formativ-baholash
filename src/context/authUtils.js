@@ -19,8 +19,8 @@ import {
 export const ADMIN_USER = {
   id: 'admin',
   name: 'Admin',
-  email: 'qosimovamuxlisaxon04@gmail.com',
-  password: 'hasanova4',
+  email: 'saydullaxonovhasanxonn@gmail.com',
+  password: 'kamina2004',
   role: 'admin',
 }
 

@@ -227,16 +227,79 @@ export default function ExamBuilder() {
 		handleAddOrEdit()
 	}
 	const parseQuestions = text => {
-		// PDF da matn spaceli keladi, normalize qilamiz
-		// "1. Savol A) opt B) opt ..." formatni ham, "\n" bilan kelganini ham qo'llab quvvatlaymiz
+		// =====================================================
+		// QAYSI FORMAT EKANLIGINI ANIQLAYMIZ
+		// =====================================================
+		// Format 1 (raqamli):  "1. Savol\nA) ...\n#C) ...\nJavob: C"
+		// Format 2 (+++++):    "+++++\nSavol matni\n=====# To'g'ri variant\n===== Variant\n..."
+		// =====================================================
 
-		// Avval butun matnni normalize qilamiz:
-		// PDF spacing muammosi: "1 ." yoki "1." ikkalasini ham ushlash uchun
+		const isHashFormat = /^\+{3,}/m.test(text)
+
+		if (isHashFormat) {
+			// ── FORMAT 2: +++++ separator, ===== variantlar, =====# to'g'ri ──
+			const blocks = text.split(/\n?\+{3,}\n?/).map(b => b.trim()).filter(Boolean)
+
+			if (blocks.length === 0) {
+				alert("Savollar topilmadi. +++++ formatini tekshiring.")
+				return
+			}
+
+			const parsed = blocks.map(block => {
+				const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
+
+				// Birinchi qator — savol matni
+				const questionText = lines[0] || ''
+
+				const options = []
+				let correctIndex = null
+
+				// Qolgan qatorlar — variantlar
+				// To'g'ri variant: "=====# matn" yoki "=====#matn"
+				// Oddiy variant:   "===== matn"
+				lines.slice(1).forEach(line => {
+					const correctMatch = line.match(/^=+#\s*(.+)/)
+					const normalMatch = line.match(/^=+\s+(.+)/)
+
+					if (correctMatch) {
+						correctIndex = options.length
+						options.push(correctMatch[1].trim())
+					} else if (normalMatch) {
+						options.push(normalMatch[1].trim())
+					}
+				})
+
+				// 4 ta bo'lmasa to'ldiramiz
+				while (options.length < 4) options.push('')
+
+				return {
+					id: Date.now() + Math.random(),
+					text: questionText,
+					options: options.slice(0, 4),
+					correctIndex,
+					points: 1,
+				}
+			}).filter(q => q.text.length > 0)
+
+			if (parsed.length === 0) {
+				alert("Hujjatdan savollar parse qilinmadi. Format to'g'riligini tekshiring.")
+				return
+			}
+
+			const updated = [...questions, ...parsed]
+			setQuestions(updated)
+			saveToStorage(updated)
+			return
+		}
+
+		// ── FORMAT 1: raqamli savollar, # bilan to'g'ri javob ──
+		// PDF da matn spaceli keladi, normalize qilamiz
 		let normalizedText = text
 			// Raqam va nuqta orasidagi bo'sh joyni olib tashlaymiz: "1 ." → "1."
 			.replace(/(\d+)\s*\.\s*/g, '\n$1. ')
 			// Variant harflari oldidan yangi qator qo'shamiz (agar yo'q bo'lsa)
-			.replace(/\s([A-D])\)\s*/g, '\n$1) ')
+			// # belgisini ham qo'llab-quvvatlaymiz: "#A)" "#A."
+			.replace(/\s(#?[A-D])\)\s*/g, '\n$1) ')
 			// Javob/Answer oldidan yangi qator
 			.replace(/\s*(Javob|Answer)\s*:/gi, '\nJavob:')
 			.trim()
@@ -245,7 +308,7 @@ export default function ExamBuilder() {
 		const questionBlocks = normalizedText.split(/\n(?=\d+\.\s)/).filter(s => s.trim())
 
 		if (questionBlocks.length === 0) {
-			alert("Savollar topilmadi. Hujjat formati to'g'ri emasligini tekshiring.\n\nFormat: '1. Savol matni\nA) variant\nB) variant\nC) variant\nD) variant\nJavob: A'")
+			alert("Savollar topilmadi. Hujjat formati to'g'ri emasligini tekshiring.\n\nFormat 1 (Javobli): '1. Savol\nA) variant\n#B) to'g'ri variant\nC) variant\nD) variant'\nFormat 2 (Javob qatori): '1. Savol\nA) variant\nB) variant\nJavob: B'")
 			return
 		}
 
@@ -259,24 +322,33 @@ export default function ExamBuilder() {
 			// 🔹 Variantlarni topish
 			const options = ['', '', '', '']
 			const optionLetters = ['A', 'B', 'C', 'D']
+			let correctIndex = null
 
 			lines.forEach(line => {
 				optionLetters.forEach((letter, idx) => {
-					// "A) matn" yoki "A. matn" formatlarini qo'llab-quvvatlash
-					const match = line.match(new RegExp(`^${letter}[).]\\s*(.+)`, 'i'))
-					if (match) {
-						options[idx] = match[1].trim()
+					// "#A) matn" — to'g'ri javob, "#A. matn" ham
+					const correctMatch = line.match(new RegExp(`^#${letter}[).]\\s*(.+)`, 'i'))
+					if (correctMatch) {
+						options[idx] = correctMatch[1].trim()
+						correctIndex = idx
+						return
+					}
+					// "A) matn" yoki "A. matn" — oddiy variant
+					const normalMatch = line.match(new RegExp(`^${letter}[).]\\s*(.+)`, 'i'))
+					if (normalMatch) {
+						options[idx] = normalMatch[1].trim()
 					}
 				})
 			})
 
-			// 🔹 Javob kaliti — "Javob: B" yoki "Answer: B"
-			let correctIndex = null
-			const answerLine = lines.find(l => /^(Javob|Answer)\s*:/i.test(l))
-			if (answerLine) {
-				const match = answerLine.match(/:\s*([A-D])/i)
-				if (match) {
-					correctIndex = match[1].toUpperCase().charCodeAt(0) - 65
+			// 🔹 Agar # topilmasa, "Javob: B" formatini tekshiramiz (orqaga mos keluvchi)
+			if (correctIndex === null) {
+				const answerLine = lines.find(l => /^(Javob|Answer)\s*:/i.test(l))
+				if (answerLine) {
+					const match = answerLine.match(/:\s*([A-D])/i)
+					if (match) {
+						correctIndex = match[1].toUpperCase().charCodeAt(0) - 65
+					}
 				}
 			}
 
@@ -287,7 +359,7 @@ export default function ExamBuilder() {
 				correctIndex,
 				points: 1,
 			}
-		}).filter(q => q.text.length > 0) // bo'sh savollarni o'tkazib yuboramiz
+		}).filter(q => q.text.length > 0)
 
 		if (parsed.length === 0) {
 			alert("Hujjatdan savollar parse qilinmadi. Format to'g'riligini tekshiring.")

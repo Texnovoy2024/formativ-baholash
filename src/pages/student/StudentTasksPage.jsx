@@ -36,13 +36,21 @@ export default function StudentTasksPage() {
   const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {}
 
   useEffect(() => {
-    const load = async () => {
+    load()
+
+    // Foydalanuvchi boshqa tab/sahifadan qaytganda natijalarni yangilash
+    const onFocus = () => load()
+    window.addEventListener("focus", onFocus)
+    return () => window.removeEventListener("focus", onFocus)
+  }, [])
+
+  async function load() {
       setLoading(true)
       try {
         const [allExams, allProjects, allResults, allSubs] = await Promise.all([
           getAllExamsFn(),
           getAllProjectsFn(),
-          getExamResultsFn(currentUser.id, true),
+          getExamResultsFn(currentUser.id, true),   // har doim fresh
           getProjectSubmissionsFn(currentUser.id, true),
         ])
 
@@ -75,9 +83,7 @@ export default function StudentTasksPage() {
       } finally {
         setLoading(false)
       }
-    }
-    load()
-  }, [])
+  }
 
   if (loading) {
     return (

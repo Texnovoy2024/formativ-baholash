@@ -20,9 +20,8 @@ export default function StudentExamPage() {
   /* ================= LOAD EXAM ================= */
   useEffect(() => {
     const load = async () => {
-      const [allExams, allResults] = await Promise.all([
+      const [allExams] = await Promise.all([
         getAllExamsFn(),
-        getExamResultsFn(currentUser?.id)
       ])
       
       const found = allExams.find(e => String(e.id) === String(examId))
@@ -34,8 +33,9 @@ export default function StudentExamPage() {
         return navigate("/student/tasks")
       }
 
-      // Check if already taken
-      const alreadyTaken = allResults.some(
+      // Check if already taken — forceRefresh bilan yangi ma'lumot olish
+      const freshResults = await getExamResultsFn(currentUser?.id, true)
+      const alreadyTaken = freshResults.some(
         r => String(r.examId) === String(examId) && String(r.studentId) === String(currentUser?.id)
       )
       if (alreadyTaken) {
@@ -135,14 +135,18 @@ export default function StudentExamPage() {
     setIsFinished(true)
     clearExamStorage()
     await saveResult()
-    navigate("/student/results")
+    // Keshni tozalab natijalar sahifasiga o'tish
+    navigate("/student/results", { replace: true })
   }
 
   const confirmFinish = async () => {
+    if (isFinished) return
     setIsFinished(true)
+    setShowModal(false)
     clearExamStorage()
     await saveResult()
-    navigate("/student/results")
+    // Keshni tozalab natijalar sahifasiga o'tish
+    navigate("/student/results", { replace: true })
   }
 
   if (!exam) return <h2>Yuklanmoqda...</h2>

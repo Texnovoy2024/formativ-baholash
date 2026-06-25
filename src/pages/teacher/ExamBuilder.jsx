@@ -13,6 +13,7 @@ import {
 	ArrowUpAZ,
 	ArrowDownAZ,
 	AlertTriangle,
+	Shuffle,
 } from 'lucide-react'
 import ConfirmModal from '../../components/ui/ConfirmModal'
 import './ExamBuilder.css'
@@ -50,6 +51,7 @@ export default function ExamBuilder() {
 				setMaxTotalPoints(found.maxTotalPoints || '')
 				setIsPublished(found.isPublished || false)
 				setQuestions(found.questions || [])
+				setQuestionsPerStudent(found.questionsPerStudent || '')
 			}
 			setLoading(false)
 		}
@@ -61,6 +63,7 @@ export default function ExamBuilder() {
 	const [examTitle, setExamTitle] = useState('')
 	const [timeLimit, setTimeLimit] = useState('')
 	const [maxTotalPoints, setMaxTotalPoints] = useState('')
+	const [questionsPerStudent, setQuestionsPerStudent] = useState('')
 	const [isPublished, setIsPublished] = useState(false)
 
 	const [questions, setQuestions] = useState([])
@@ -114,6 +117,7 @@ export default function ExamBuilder() {
 			examTitle,
 			timeLimit,
 			maxTotalPoints,
+			questionsPerStudent: questionsPerStudent ? Number(questionsPerStudent) : null,
 			questions: updatedQuestions,
 			isPublished,
 			deadline: task.deadline || null,
@@ -488,6 +492,28 @@ export default function ExamBuilder() {
 					<span className='error-text'>{errors.maxTotalPoints}</span>
 				)}
 
+				<div className='input-with-icon'>
+					<Shuffle size={18} />
+					<input
+						type='number'
+						min='1'
+						max={questions.length || undefined}
+						placeholder={`Har studentga nechta savol (max: ${questions.length || '?'})`}
+						value={questionsPerStudent}
+						onChange={e => setQuestionsPerStudent(e.target.value)}
+					/>
+				</div>
+				{questionsPerStudent && questions.length > 0 && Number(questionsPerStudent) > questions.length && (
+					<span className='error-text'>
+						Savollar soni {questions.length} ta, undan ko'p bo'lishi mumkin emas
+					</span>
+				)}
+				{questionsPerStudent && Number(questionsPerStudent) > 0 && (
+					<span style={{ fontSize: 12, color: '#6b7280', marginTop: -8, display: 'block' }}>
+						Har o'quvchi {questionsPerStudent} ta random savol oladi ({questions.length} tadan)
+					</span>
+				)}
+
 				<p className='exam-summary'>
 					Savollar: {questions.length} | Umumiy ball: {totalPoints}
 				</p>
@@ -597,6 +623,7 @@ export default function ExamBuilder() {
     examTitle,
     timeLimit,
     maxTotalPoints,
+    questionsPerStudent: questionsPerStudent ? Number(questionsPerStudent) : null,
     questions,
     teacherId: currentUser.id,
     classId: task.classId || null,

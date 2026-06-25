@@ -52,8 +52,28 @@ export default function StudentExamPage() {
       const limit = Number(found.timeLimit)
       if (!limit || limit <= 0) return
 
-      setExam(found)
-      examRef.current = found
+      // questionsPerStudent sozlamasi bo'lsa — random shuffle qilamiz
+      // Har student uchun deterministik bo'lishi uchun studentId + examId seed ishlatamiz
+      let finalQuestions = [...(found.questions || [])]
+      const qps = Number(found.questionsPerStudent)
+      if (qps > 0 && finalQuestions.length > qps) {
+        // Fisher-Yates shuffle (studentId + examId seed bilan)
+        const seed = String(currentUser?.id) + String(found.id)
+        let seedNum = Array.from(seed).reduce((acc, c) => acc + c.charCodeAt(0), 0)
+        const seededRandom = () => {
+          seedNum = (seedNum * 9301 + 49297) % 233280
+          return seedNum / 233280
+        }
+        for (let i = finalQuestions.length - 1; i > 0; i--) {
+          const j = Math.floor(seededRandom() * (i + 1));
+          [finalQuestions[i], finalQuestions[j]] = [finalQuestions[j], finalQuestions[i]]
+        }
+        finalQuestions = finalQuestions.slice(0, qps)
+      }
+
+      const examWithSlicedQuestions = { ...found, questions: finalQuestions }
+      setExam(examWithSlicedQuestions)
+      examRef.current = examWithSlicedQuestions
 
       // Refresh da vaqtni tiklash: localStorage da saqlanган endTime bor bo'lsa ishlatamiz
       const storageKey = `examEndTime_${examId}_${currentUser?.id}`

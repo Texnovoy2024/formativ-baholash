@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Clock, CheckCircle, AlertTriangle, Send } from "lucide-react"
 import "./StudentExamPage.css"
 import { getAllExamsFn, addExamResultFn, getExamResultsFn } from "../../context/authUtils"
@@ -14,6 +14,12 @@ export default function StudentExamPage() {
   const [endTime, setEndTime] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // answers ni ref da ham saqlash — closure muammosini hal qiladi
+  const answersRef = useRef({})
+  const examRef = useRef(null)
+  const isFinishedRef = useRef(false)
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"))
 
@@ -47,6 +53,7 @@ export default function StudentExamPage() {
       if (!limit || limit <= 0) return
 
       setExam(found)
+      examRef.current = found
 
       // Refresh da vaqtni tiklash: localStorage da saqlanган endTime bor bo'lsa ishlatamiz
       const storageKey = `examEndTime_${examId}_${currentUser?.id}`
@@ -88,7 +95,13 @@ export default function StudentExamPage() {
   }, [endTime, isFinished])
 
   const handleSelect = (questionId, optionIndex) => {
-    setAnswers(prev => ({ ...prev, [questionId]: optionIndex }))
+    // questionId ni string ga o'tkazamiz — type mismatch ni oldini olish
+    const key = String(questionId)
+    setAnswers(prev => {
+      const updated = { ...prev, [key]: optionIndex }
+      answersRef.current = updated
+      return updated
+    })
   }
 
   /* ================= EXAM TUGAGANDA TOZALASH ================= */
@@ -100,56 +113,75 @@ export default function StudentExamPage() {
 
   /* ================= SAVE RESULT ================= */
   const saveResult = async () => {
+    // ref dan o'qiymiz — closure muammosidan xoli
+    const currentExam = examRef.current
+    const currentAnswers = answersRef.current
+
+    if (!currentExam) return
+
     let score = 0
-    exam.questions.forEach(q => {
-      if (answers[q.id] === q.correctIndex) {
+    currentExam.questions.forEach(q => {
+      if (currentAnswers[String(q.id)] === q.correctIndex) {
         score += Number(q.points || 0)
       }
     })
 
     const result = {
-      examId: String(exam.id),
-      examTitle: exam.examTitle,
-      teacherId: String(exam.teacherId), // String ga o'tkazish
-      classId: String(currentUser.classId || ""), // String ga o'tkazish
+      examId: String(currentExam.id),
+      examTitle: currentExam.examTitle,
+      teacherId: String(currentExam.teacherId),
+      classId: String(currentUser.classId || ""),
       studentId: String(currentUser.id),
       studentName: currentUser.name || currentUser.fullName || "Noma'lum",
       score: Number(score),
-      total: Number(exam.questions.reduce((sum, q) => sum + Number(q.points || 0), 0)),
+      total: Number(currentExam.questions.reduce((sum, q) => sum + Number(q.points || 0), 0)),
       date: new Date().toISOString(),
-      answers: exam.questions.map(q => ({
+      answers: currentExam.questions.map(q => ({
         questionId: q.id,
         questionText: q.text,
         options: q.options,
-        correct: (answers[q.id] ?? null) === q.correctIndex,
-        chosen: answers[q.id] ?? null,
+        correct: (currentAnswers[String(q.id)] ?? null) === q.correctIndex,
+        chosen: currentAnswers[String(q.id)] ?? null,
         correctIndex: q.correctIndex,
       })),
     }
 
-    await addExamResultFn(result)
+    const res = await addExamResultFn(result)
+    return res
+  }
+
+  const finishExam = async () => {
+    // Double-submit himoyasi
+    if (isFinishedRef.current) return
+    isFinishedRef.current = true
+    setIsFinished(true)
+    setShowModal(false)
+    setIsSaving(true)
+    clearExamStorage()
+
+    await saveResult()
+
+    setIsSaving(false)
+    navigate("/student/results", { replace: true })
   }
 
   const autoSubmit = async () => {
-    if (isFinished) return
-    setIsFinished(true)
-    clearExamStorage()
-    await saveResult()
-    // Keshni tozalab natijalar sahifasiga o'tish
-    navigate("/student/results", { replace: true })
+    await finishExam()
   }
 
   const confirmFinish = async () => {
-    if (isFinished) return
-    setIsFinished(true)
-    setShowModal(false)
-    clearExamStorage()
-    await saveResult()
-    // Keshni tozalab natijalar sahifasiga o'tish
-    navigate("/student/results", { replace: true })
+    await finishExam()
   }
 
   if (!exam) return <h2>Yuklanmoqda...</h2>
+
+  if (isSaving) return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60vh", gap: "16px" }}>
+      <div style={{ width: 48, height: 48, border: "4px solid #e5e7eb", borderTop: "4px solid #2563eb", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      <p style={{ color: "#6b7280", fontSize: 16 }}>Natija saqlanmoqda...</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
 
   const minutes = Math.floor(timeLeft / 60)
   const seconds = timeLeft % 60

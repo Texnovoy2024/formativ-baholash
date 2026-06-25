@@ -514,7 +514,15 @@ export const addExamResultFn = async (result) => {
       total: Number(result.total || 0),
       studentId: String(result.studentId),
       examId: String(result.examId),
-      date: result.date || new Date().toISOString()
+      date: result.date || new Date().toISOString(),
+      // answers array ichidagi barcha maydonlarni tozalash
+      answers: (result.answers || []).map(a => ({
+        ...a,
+        questionId: String(a.questionId ?? ''),
+        chosen: a.chosen !== null && a.chosen !== undefined ? Number(a.chosen) : null,
+        correctIndex: a.correctIndex !== null && a.correctIndex !== undefined ? Number(a.correctIndex) : null,
+        correct: Boolean(a.correct),
+      })),
     }
 
     const key = `${cleanResult.examId}_${cleanResult.studentId}_${Date.now()}`
